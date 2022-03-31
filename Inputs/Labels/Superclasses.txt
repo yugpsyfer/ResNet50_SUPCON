@@ -1,0 +1,7 @@
+wdnet_ID Name supercategory
+00021939-n artifact object
+00015388-n animal object
+00017222-n plant object
+00021265-n food object
+00033020-n communication object
+00002684-n object -
