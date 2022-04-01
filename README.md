@@ -1,1 +1,1 @@
-# ResNet50_SUPCON
+# ResNet50_SUPCON + KG
