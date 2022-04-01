@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from sklearn.metrics import accuracy_score
 
 
@@ -10,6 +11,7 @@ def calculate_loss(criterion, labels_true, out):
         loss = loss_func(labels_true, out)
     elif loss_name == "SupCon":
         bsz = labels_true.shape[0]
+        out = F.normalize(out, dim=1)
         f1, f2 = torch.split(out, [bsz, bsz], dim=0)
         out = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
         loss = loss_func(features=out, labels=labels_true)

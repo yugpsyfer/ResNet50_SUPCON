@@ -2,6 +2,8 @@
 # import matplotlib.image as mpimg
 
 import argparse
+import os.path
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -12,7 +14,10 @@ from Model.model import resNet50
 from Model.supconloss import SupConLoss
 from Model import training
 from Data import mini_imagenet
+from KnowledgeGraph import embedding
 
+
+output_model_path = "./Outputs/Pretrained_Models/"
 criterion_options = dict()
 criterion_options['SupCon'] = {"epochs": 1000,
                                "temperature": 0.5,
@@ -22,19 +27,24 @@ criterion_options['SupCon'] = {"epochs": 1000,
 
 criterion_options['CE'] = {"epochs": 500,
                            "optimizer": "SGD",
-                           "learning_rate": 0.5}
+                           "learning_rate": 0.8}
 
 
-def load_pretrained_model():
-    pass
+def load_pretrained_model(model_name):
+    load_path = os.path.join(output_model_path, model_name)
+    model_ = torch.load(load_path)
+
+    return model_
 
 
-def make_model_(pretrain, criterion_loss):
+def make_model_(pretrain, criterion_loss, model_name):
     model_with_fc = resNet50()
     final_model = None
     if pretrain:
         if criterion_loss == "SupCon":
             final_model = torch.nn.Sequential(*(list(model_with_fc.model_.children())[:-1]))
+            final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True))
+
         elif criterion_loss == "CE":
             final_model = torch.nn.Sequential(*(list(model_with_fc.model_.children())[:-1]))
             final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
@@ -42,9 +52,10 @@ def make_model_(pretrain, criterion_loss):
         else:
             raise ValueError
     else:
-        pretrained_model = load_pretrained_model() #NEEDS EDITING
+        pretrained_model = load_pretrained_model(model_name) #NEEDS EDITING
         final_model = torch.nn.Sequential(*(list(pretrained_model.model_.children())[:-1]))
-
+        final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
+                                       nn.Softmax())
     return final_model
 
 
@@ -84,24 +95,28 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain', type=bool, default=True, help="Choose if you want  to pretrain")
     parser.add_argument('--batch_size', type=int, default=1024, help="Choose batch size for training")
     parser.add_argument('--model_eval', type=bool, default=False, help="Choose whether to test model")
+    parser.add_argument('--model_to_train', type=str, help="Choose th model to train")
 
     opt = parser.parse_args()
     dev = get_cuda_device()
 
-    if opt.loss_criterion == "SupCon":
-        temperature = criterion_options['SupCon']['temperature']
-        base_temperature = temperature
-        optimizer = optim.criterion_options['SupCon']['optimizer'](lr = criterion_options['SupCon']['learning_rate'])
-        epochs = criterion_options['SupCon']['epochs']
-        criterion = ["SupCon", SupConLoss(temperature=temperature, contrast_mode='all',
-                                          base_temperature=base_temperature, device=dev)]
+    if opt.pretrain:
+        if opt.loss_criterion == "SupCon":
+            temperature = criterion_options['SupCon']['temperature']
+            base_temperature = temperature
+            optimizer = optim.criterion_options['SupCon']['optimizer'](lr = criterion_options['SupCon']['learning_rate'])
+            epochs = criterion_options['SupCon']['epochs']
+            criterion = ["SupCon", SupConLoss(temperature=temperature, contrast_mode='all',
+                                              base_temperature=base_temperature, device=dev)]
 
-    elif opt.loss_criterion == "CE":
-        epochs = criterion_options['CE']['epochs']
-        optimizer = optim.criterion_options['CE']['optimizer'](lr=criterion_options['CE']['learning_rate'])
-        criterion = ["CE", F.cross_entropy]
+        elif opt.loss_criterion == "CE":
+            epochs = criterion_options['CE']['epochs']
+            optimizer = optim.criterion_options['CE']['optimizer'](lr=criterion_options['CE']['learning_rate'])
+            criterion = ["CE", F.cross_entropy]
+        else:
+            raise NameError("Loss not supported")
     else:
-        raise NameError("Loss not supported")
+        pass
 
     model = make_model_(opt.pretrain, opt.loss_criterion)
     model.to_device(dev)
@@ -112,7 +127,7 @@ if __name__ == '__main__':
                                    criterion=criterion, epochs=epochs,
                                    optimizer=optimizer, dev=dev, model=model)
 
-    model_save_path = "./Pretrained_Models/"+opt.loss_criterion
+    model_save_path = os.path.join(output_model_path, opt.loss_criterion + ".pth")
     torch.save(trained_model, model_save_path)
 
 
