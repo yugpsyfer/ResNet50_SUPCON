@@ -1,15 +1,24 @@
 import torch
-import torch.nn.functional as F
 from sklearn.metrics import accuracy_score
 
 
-def calculate_loss(labels_true, labels_pred):
-    loss = F.cross_entropy(labels_true, labels_pred)
+def calculate_loss(criterion, labels_true, out):
+    loss_name = criterion[0]
+    loss_func = criterion[1]
+
+    if loss_name == "CE":
+        loss = loss_func(labels_true, out)
+    elif loss_name == "SupCon":
+        bsz = labels_true.shape[0]
+        f1, f2 = torch.split(out, [bsz, bsz], dim=0)
+        out = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
+        loss = loss_func(features=out, labels=labels_true)
+
     return loss
 
 
 @torch.no_grad
-def validate(val_dl, model, dev):
+def validate(val_dl, model, dev, criterion):
     net_loss = 0
     net_accuracy = 0
     count = 0
@@ -20,9 +29,9 @@ def validate(val_dl, model, dev):
         labels = labels.to_device(dev)
 
         out = model(images)
-        loss = calculate_loss(labels, out)
+        loss = calculate_loss(criterion, labels, out)
 
-        pred = torch.argmax(loss, dim=1).cpu()
+        pred = torch.argmax(out, dim=1).cpu()
         pred = pred.numpy().flatten()
         labels = labels.cpu()
         labels = labels.numpy().flatten()
@@ -36,7 +45,7 @@ def validate(val_dl, model, dev):
     return net_loss / count, net_accuracy / count
 
 
-def train(train_dl, val_dl, epochs, optimizer, model, dev):
+def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
     model.train()
     history = []
 
@@ -50,13 +59,15 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev):
             labels = labels.to_device(dev)
 
             out = model(images)
-            loss = calculate_loss(labels, out)
+            loss = calculate_loss(criterion, labels, out)
             loss.backward()
             optimizer.step()
 
         if epoch % 10 == 0:
-            l, acc = validate(val_dl, model, dev)
+            l, acc = validate(val_dl, model, dev, criterion)
             history.append((l, acc))
+
+    return model
 
 
 
