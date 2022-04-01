@@ -49,7 +49,9 @@ def validate(val_dl, model, dev, criterion):
 
 def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
     model.train()
-    history = []
+    history = dict()
+    history['train'] = []
+    history['val'] = []
 
     for epoch in range(epochs):
 
@@ -65,11 +67,13 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             loss.backward()
             optimizer.step()
 
-        if epoch % 10 == 0:
+        if epoch % 50 == 0:
             l, acc = validate(val_dl, model, dev, criterion)
-            history.append((l, acc))
+            history['val'].append((l, acc))
 
-    return model
+            history['train'].append(loss)
+
+    return model, history
 
 
 

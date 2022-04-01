@@ -1,10 +1,7 @@
-# import matplotlib.pyplot as plt
-# import matplotlib.image as mpimg
-
 import argparse
 import os.path
-
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -14,7 +11,7 @@ from Model.model import resNet50
 from Model.supconloss import SupConLoss
 from Model import training
 from Data import mini_imagenet
-from KnowledgeGraph import embedding
+import matplotlib.pyplot as plt
 
 
 output_model_path = "./Outputs/Pretrained_Models/"
@@ -88,6 +85,25 @@ def prepare_dataloader(dataset, batch_size):
     return train_, val_
 
 
+def draw_and_save_plots(history_, ep):
+    plot_path = "./Outputs/plots/"
+    train = [i for i in history_['train']]
+    val = [i[0] for i in history_['val']]
+
+    epo = np.linspace(start=0, stop=ep, num=50)
+
+    plt.figure(figsize=(10, 10))
+
+    plt.plot(epo, train, color='blue', label='Train LOSS VS EPOCHS', linewidth=2, linestyle='dashed')
+    plt.plot(epo, val, color='red', label='Validation LOSS VS EPOCHS', linewidth=2, linestyle='dashed')
+
+    plt.xlabel("EPOCHS")
+    plt.ylabel("LOSS")
+    plt.legend()
+
+    plt.savefig(plot_path+"output.jpg")
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process options for training')
     parser.add_argument('--loss_criterion', type=str, default="SupCon",
@@ -123,9 +139,11 @@ if __name__ == '__main__':
 
     train_dl, val_dl = prepare_dataloader(mini_imagenet, opt.batch_size)
 
-    trained_model = training.train(train_dl=train_dl, val_dl=val_dl,
-                                   criterion=criterion, epochs=epochs,
-                                   optimizer=optimizer, dev=dev, model=model)
+    trained_model, history = training.train(train_dl=train_dl, val_dl=val_dl,
+                                            criterion=criterion, epochs=epochs,
+                                            optimizer=optimizer, dev=dev, model=model)
+
+    draw_and_save_plots(history_=history, ep=epochs)
 
     model_save_path = os.path.join(output_model_path, opt.loss_criterion + ".pth")
     torch.save(trained_model, model_save_path)
