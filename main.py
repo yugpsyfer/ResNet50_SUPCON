@@ -70,10 +70,10 @@ def get_cuda_device():
             except BaseException:
                 print("Cuda Device "+str(i)+" is busy. Trying other devices")
     else:
-        #raise EnvironmentError("CUDA NOT AVAILABLE")
-        pass
+        raise EnvironmentError("CUDA NOT AVAILABLE")
 
-    return torch.device('cpu') #device
+
+    return device
 
 
 def prepare_dataloader(dataset_class, batch_size, crit):
