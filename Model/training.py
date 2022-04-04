@@ -19,7 +19,7 @@ def calculate_loss(criterion, labels_true, out):
     return loss
 
 
-@torch.no_grad
+@torch.no_grad()
 def validate(val_dl, model, dev, criterion):
     net_loss = 0
     net_accuracy = 0
@@ -27,8 +27,8 @@ def validate(val_dl, model, dev, criterion):
 
     for batch in val_dl:
         labels, images = batch
-        images = images.to_device(dev)
-        labels = labels.to_device(dev)
+        images = images.to(dev)
+        labels = labels.to(dev)
 
         out = model(images)
         loss = calculate_loss(criterion, labels, out)
@@ -59,8 +59,8 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             optimizer.zero_grad()
 
             labels, images = batch
-            images = images.to_device(dev)
-            labels = labels.to_device(dev)
+            images = images.to(dev)
+            labels = labels.to(dev)
 
             out = model(images)
             loss = calculate_loss(criterion, labels, out)

@@ -10,9 +10,9 @@ from torch.utils.data import random_split
 from Model.model import resNet50
 from Model.supconloss import SupConLoss
 from Model import training
-from Data import mini_imagenet
+from Data.mini_imagenet import MiniImageNet
 import matplotlib.pyplot as plt
-
+import importlib
 
 output_model_path = "./Outputs/Pretrained_Models/"
 criterion_options = dict()
@@ -20,10 +20,10 @@ criterion_options['SupCon'] = {"epochs": 1000,
                                "temperature": 0.5,
                                "annealing": "cosine",
                                "learning_rate": 0.5,
-                               "optimizer": "SGD"}
+                               "optimizer": "sgd"}
 
 criterion_options['CE'] = {"epochs": 500,
-                           "optimizer": "SGD",
+                           "optimizer": "sgd",
                            "learning_rate": 0.8}
 
 
@@ -37,15 +37,16 @@ def load_pretrained_model(model_name):
 def make_model_(pretrain, criterion_loss, model_name):
     model_with_fc = resNet50()
     final_model = None
+    layers = list(model_with_fc.model_.children())[:-1]
     if pretrain:
         if criterion_loss == "SupCon":
-            final_model = torch.nn.Sequential(*(list(model_with_fc.model_.children())[:-1]))
-            final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True))
+            model_with_fc.model_.fc = nn.Linear(in_features=2048, out_features=300, bias=True)
+            final_model = model_with_fc.model_
 
         elif criterion_loss == "CE":
-            final_model = torch.nn.Sequential(*(list(model_with_fc.model_.children())[:-1]))
-            final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
-                                           nn.Softmax())
+            model_with_fc.model_.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
+                                                    nn.Softmax())
+            final_model = model_with_fc.model_
         else:
             raise ValueError
     else:
@@ -69,12 +70,14 @@ def get_cuda_device():
             except BaseException:
                 print("Cuda Device "+str(i)+" is busy. Trying other devices")
     else:
-        raise EnvironmentError("CUDA NOT AVAILABLE")
+        #raise EnvironmentError("CUDA NOT AVAILABLE")
+        pass
 
-    return device
+    return torch.device('cpu') #device
 
 
-def prepare_dataloader(dataset, batch_size):
+def prepare_dataloader(dataset_class, batch_size, crit):
+    dataset = dataset_class(root_dir="./Inputs/mini_image_net_merged/",label_file="./Inputs/Labels/wordnet_details.txt",criterion=crit)
     val_size = int(len(dataset) * 0.1)
     train_size = len(dataset) - int(len(dataset) * 0.1)
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
@@ -107,7 +110,7 @@ def draw_and_save_plots(history_, ep):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process options for training')
     parser.add_argument('--loss_criterion', type=str, default="SupCon",
-                        choices=["SupCon,CE"], help="Choose the loss criterion")
+                        choices=["SupCon", "CE"], help="Choose the loss criterion")
     parser.add_argument('--pretrain', type=bool, default=True, help="Choose if you want  to pretrain")
     parser.add_argument('--batch_size', type=int, default=1024, help="Choose batch size for training")
     parser.add_argument('--model_eval', type=bool, default=False, help="Choose whether to test model")
@@ -118,26 +121,31 @@ if __name__ == '__main__':
 
     if opt.pretrain:
         if opt.loss_criterion == "SupCon":
+            model = make_model_(opt.pretrain, opt.loss_criterion, None)
             temperature = criterion_options['SupCon']['temperature']
             base_temperature = temperature
-            optimizer = optim.criterion_options['SupCon']['optimizer'](lr = criterion_options['SupCon']['learning_rate'])
+            l_r = criterion_options['SupCon']['learning_rate']
+            optimr = importlib.import_module("torch.optim." + criterion_options['SupCon']['optimizer'])
+            optimizer = optimr.SGD(lr=l_r, params=model.parameters())
             epochs = criterion_options['SupCon']['epochs']
             criterion = ["SupCon", SupConLoss(temperature=temperature, contrast_mode='all',
                                               base_temperature=base_temperature, device=dev)]
 
         elif opt.loss_criterion == "CE":
+            model = make_model_(opt.pretrain, opt.loss_criterion, None)
             epochs = criterion_options['CE']['epochs']
-            optimizer = optim.criterion_options['CE']['optimizer'](lr=criterion_options['CE']['learning_rate'])
+            l_r = criterion_options['CE']['learning_rate']
+            optimr = importlib.import_module("torch.optim." + criterion_options['CE']['optimizer'])
+            optimizer = optimr.SGD(lr=l_r, params=model.parameters())
             criterion = ["CE", F.cross_entropy]
         else:
             raise NameError("Loss not supported")
     else:
         pass
 
-    model = make_model_(opt.pretrain, opt.loss_criterion)
-    model.to_device(dev)
+    model.to(dev)
 
-    train_dl, val_dl = prepare_dataloader(mini_imagenet, opt.batch_size)
+    train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion)
 
     trained_model, history = training.train(train_dl=train_dl, val_dl=val_dl,
                                             criterion=criterion, epochs=epochs,

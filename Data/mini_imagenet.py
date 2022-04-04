@@ -5,7 +5,6 @@ import numpy as np
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 import pandas as pd
-import pickle as pkl
 
 
 class MiniImageNet(Dataset):
@@ -22,7 +21,8 @@ class MiniImageNet(Dataset):
             for k, v in labels:
                 self.label_dict[v] = k
         else:
-            self.label_dict = pkl.load(label_file)
+            embedding_path = "./Outputs/Knowledge_Graphs/embeddings.npy"
+            self.label_dict = np.load(embedding_path, allow_pickle=True)
 
     def __len__(self):
         return len(os.listdir(self.rootDir))
