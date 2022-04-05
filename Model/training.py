@@ -26,7 +26,7 @@ def validate(val_dl, model, dev, criterion):
     count = 0
 
     for batch in val_dl:
-        labels, images = batch
+        images, labels = batch
         images = images.to(dev)
         labels = labels.to(dev)
 
@@ -58,7 +58,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
         for batch in train_dl:
             optimizer.zero_grad()
 
-            labels, images = batch
+            images, labels = batch
             images = images.to(dev)
             labels = labels.to(dev)
 
