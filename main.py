@@ -64,7 +64,7 @@ def get_cuda_device():
         for i in range(count):
             try:
                 device = torch.device('cuda:'+str(i))
-                test_tensor = test_tensor.to_device(device)
+                test_tensor = test_tensor.to(device)
                 print("Using CUDA device "+str(i))
                 break
             except BaseException:
