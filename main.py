@@ -63,6 +63,7 @@ def get_cuda_device():
         count = torch.cuda.device_count()
         for i in range(count):
             try:
+                print("Trying CUDA device " + str(i))
                 device = torch.device('cuda:'+str(i))
                 test_tensor = test_tensor.to(device)
                 print("Using CUDA device "+str(i))
