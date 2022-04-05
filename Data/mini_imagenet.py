@@ -23,6 +23,7 @@ class MiniImageNet(Dataset):
         else:
             embedding_path = "./Outputs/Knowledge_Graphs/embeddings.npy"
             self.label_dict = np.load(embedding_path, allow_pickle=True)
+            self.label_dict = self.label_dict[()]
 
     def __len__(self):
         return len(os.listdir(self.rootDir))
