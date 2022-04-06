@@ -8,7 +8,7 @@ def calculate_loss(criterion, labels_true, out):
     loss_func = criterion[1]
 
     if loss_name == "CE":
-        loss = loss_func(labels_true, out)
+        loss = loss_func(out, labels_true)
     elif loss_name == "SupCon":
         bsz = labels_true.shape[0]
         out = F.normalize(out, dim=1)
@@ -28,6 +28,7 @@ def validate(val_dl, model, dev, criterion):
     for batch in val_dl:
         images, labels = batch
         images = images.to(dev)
+        labels = labels.type(torch.LongTensor)
         labels = labels.to(dev)
 
         out = model(images)
@@ -60,6 +61,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
 
             images, labels = batch
             images = images.to(dev)
+            labels = labels.type(torch.LongTensor)
             labels = labels.to(dev)
 
             out = model(images)
