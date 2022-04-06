@@ -78,13 +78,13 @@ def get_cuda_device():
 
 
 def prepare_dataloader(dataset_class, batch_size, crit):
-    dataset = dataset_class(root_dir="./Inputs/mini_image_net_merged/",label_file="./Inputs/Labels/wordnet_details.txt",criterion=crit)
+    dataset = dataset_class(root_dir="./Inputs/mini_image_net_merged/", label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
     val_size = int(len(dataset) * 0.1)
     train_size = len(dataset) - int(len(dataset) * 0.1)
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-    train_ = DataLoader(train_set, batch_size=batch_size)
-    val_ = DataLoader(val_set, batch_size=batch_size)
+    train_ = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    val_ = DataLoader(val_set, batch_size=batch_size, shuffle=True)
 
     return train_, val_
 
