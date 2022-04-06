@@ -41,7 +41,7 @@ def validate(val_dl, model, dev, criterion):
 
         acc = accuracy_score(y_true=labels, y_pred=pred)
 
-        net_loss += loss.get_item()
+        net_loss += loss.item()
         net_accuracy += acc
         count += 1
 

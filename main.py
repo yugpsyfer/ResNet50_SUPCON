@@ -45,7 +45,7 @@ def make_model_(pretrain, criterion_loss, model_name):
 
         elif criterion_loss == "CE":
             model_with_fc.model_.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
-                                                    nn.Softmax())
+                                                    nn.Softmax(dim=1))
             final_model = model_with_fc.model_
         else:
             raise ValueError
