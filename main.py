@@ -53,7 +53,7 @@ def make_model_(pretrain, criterion_loss, model_name):
         pretrained_model = load_pretrained_model(model_name) #NEEDS EDITING
         final_model = torch.nn.Sequential(*(list(pretrained_model.model_.children())[:-1]))
         final_model.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
-                                       nn.Softmax())
+                                       nn.Softmax(dim=1))
     return final_model
 
 
