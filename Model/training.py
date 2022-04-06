@@ -71,9 +71,16 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
 
         if epoch % 50 == 0:
             l, acc = validate(val_dl, model, dev, criterion)
+            l_train, acc_train = validate(train_dl, model, dev, criterion)
+            print("#####################################################################################################")
+            print("EPOCH: {epch}".format(epch=epoch))
+            print("-----------------------------------------------------------------------------------------------------")
+            print("VAL LOSS: {error}\nVAL ACCURACY: {accu}".format(error=l, accu=acc))
+            print("====================================================================================================")
+            print("TRAIN LOSS: {error}\nTRAIN ACCURACY: {accu}".format(error=l_train, accu=acc_train))
+            print("#####################################################################################################")
             history['val'].append((l, acc))
-
-            history['train'].append(loss)
+            history['train'].append((l_train, acc_train))
 
     return model, history
 
