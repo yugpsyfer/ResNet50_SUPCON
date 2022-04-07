@@ -84,7 +84,7 @@ class MiniImageNet(Dataset):
         with Image.open(self.rootDir + files) as im:
             data = self.tensorTransformation(im)
 
-        data = torch.Tensor(data)
-        embedding = torch.Tensor(embedding)
+        # data = torch.Tensor(data)
+        # embedding = torch.Tensor(embedding)
 
         return (data, label, embedding)  # Return a tuple format (data,label)
