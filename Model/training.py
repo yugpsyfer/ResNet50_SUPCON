@@ -21,11 +21,22 @@ def calculate_loss(criterion, labels_true, out, embeddings_):
 @torch.no_grad()
 def validate(val_dl, model, dev, criterion):
     net_loss = 0
-    net_accuracy = 0
+    # net_accuracy = 0
     count = 0
 
     for batch in val_dl:
-        images, labels = batch
+
+        if criterion[0] == "SupCon":
+            images, labels, embeddings = batch
+            embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
+            embeddings = embeddings.type(torch.DoubleTensor)
+            images = torch.cat([images[0], images[1]], dim=0)
+            images = images.type(torch.DoubleTensor)
+            embeddings = embeddings.to(dev)
+
+        elif criterion[1] == "CE":
+            images, labels = batch
+
         images = images.to(dev)
         labels = labels.type(torch.LongTensor)
         labels = labels.to(dev)
@@ -33,18 +44,18 @@ def validate(val_dl, model, dev, criterion):
         out = model(images)
         loss = calculate_loss(criterion, labels, out)
 
-        pred = torch.argmax(out, dim=1).cpu()
-        pred = pred.numpy().flatten()
-        labels = labels.cpu()
-        labels = labels.numpy().flatten()
-
-        acc = accuracy_score(y_true=labels, y_pred=pred)
+        # pred = torch.argmax(out, dim=1).cpu()
+        # pred = pred.numpy().flatten()
+        # labels = labels.cpu()
+        # labels = labels.numpy().flatten()
+        #
+        # acc = accuracy_score(y_true=labels, y_pred=pred)
 
         net_loss += loss.item()
-        net_accuracy += acc
+        # net_accuracy += acc
         count += 1
 
-    return net_loss / count, net_accuracy / count
+    return net_loss / count
 
 
 def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
@@ -79,15 +90,15 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
 
         if epoch % 50 == 0:
             # l, acc = validate(train_dl, model, dev, criterion)
-            l_train, acc_train = validate(train_dl, model, dev, criterion)
+            l_train = validate(train_dl, model, dev, criterion)
             print("####################################################################################")
             print("EPOCH: {epch}".format(epch=epoch))
             print("------------------------------------------------------------------------------------")
-            print("TRAIN LOSS: {error:2.6f}\nTRAIN ACCURACY: {accu:2.6f}".format(error=l_train, accu=acc_train))
+            print("TRAIN LOSS: {error:2.6f}".format(error=l_train))
             print("####################################################################################")
             # history['val'].append((l, acc))
-            logging.info("TRAIN LOSS: {error:2.6f}\nTRAIN ACCURACY: {accu:2.6f}".format(error=l_train, accu=acc_train))
-            history['train'].append((l_train, acc_train))
+            logging.info("TRAIN LOSS: {error:2.6f".format(error=l_train))
+            history['train'].append(l_train)
 
     return model, history
 

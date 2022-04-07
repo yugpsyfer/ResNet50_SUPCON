@@ -96,7 +96,7 @@ def prepare_dataloader(dataset_class, batch_size, crit):
 
 def draw_and_save_plots(history_, ep):
     plot_path = "./Outputs/plots/"
-    train = [i[1] for i in history_['train']]
+    train = [i for i in history_['train']]
 
     epo = np.linspace(start=0, stop=ep, num=50)
 
