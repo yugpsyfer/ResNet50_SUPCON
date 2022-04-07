@@ -63,7 +63,10 @@ class SupConLoss(nn.Module):
             anchor_count = contrast_count
         else:
             raise ValueError('Unknown mode: {}'.format(self.contrast_mode))
-
+        print(anchor_feature.shape)
+        print(contrast_feature.shape)
+        print(anchor_feature)
+        9/0
         # compute logits
         anchor_dot_contrast = torch.div(
             torch.matmul(anchor_feature, contrast_feature.T),
