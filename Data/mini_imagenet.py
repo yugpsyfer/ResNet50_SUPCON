@@ -58,9 +58,9 @@ class MiniImageNet(Dataset):
 
     def __getitem__(self, index):
         if self.criter == 'CE':
-            self._ce_get_item(index)
+            return self._ce_get_item(index)
         else:
-            self._supcon_get_item(index)
+            return self._supcon_get_item(index)
 
     def _ce_get_item(self, index):
         files = self.allFiles[index]
@@ -79,11 +79,9 @@ class MiniImageNet(Dataset):
         file_name = files.split("_")[0]
         label = torch.tensor(data=self.label_dict[file_name])
         _embedding_ = torch.tensor(data=self.embeddings[file_name], dtype=torch.double)
-        embedding = torch.cat((_embedding_, _embedding_), dim=0)
+        embedding = [_embedding_, _embedding_]
 
         with Image.open(self.rootDir + files) as im:
-            # z = im.resize((32, 32))
-            #z = np.array(z)
             data = self.tensorTransformation(im)
 
-        return data, label, embedding  # Return a tuple format (data,label)
+        return (data, label, embedding)  # Return a tuple format (data,label)

@@ -64,6 +64,7 @@ def make_model_(pretrain, criterion_loss, model_name):
 
 def get_cuda_device():
     test_tensor = torch.tensor(0)
+    device = None
     if torch.cuda.is_available():
         count = torch.cuda.device_count()
         for i in range(count):

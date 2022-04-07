@@ -57,10 +57,10 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
         for batch in train_dl:
             optimizer.zero_grad()
 
-            if criterion == "SupCon":
+            if criterion[0] == "SupCon":
                 images, labels, embeddings = batch
                 embeddings = embeddings.to(dev)
-            else:
+            elif criterion[1] == "CE":
                 images, labels = batch
 
             images = images.to(dev)
