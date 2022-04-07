@@ -62,8 +62,9 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
                 embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
                 embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
-                images = image.type(torch.DoubleTensor)
+                images = images.type(torch.DoubleTensor)
                 embeddings = embeddings.to(dev)
+
             elif criterion[1] == "CE":
                 images, labels = batch
 
@@ -79,12 +80,13 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
         if epoch % 50 == 0:
             # l, acc = validate(train_dl, model, dev, criterion)
             l_train, acc_train = validate(train_dl, model, dev, criterion)
-            logging.info("####################################################################################")
-            logging.info("EPOCH: {epch}".format(epch=epoch))
-            logging.info("------------------------------------------------------------------------------------")
-            logging.info("TRAIN LOSS: {error:2.6f}\nTRAIN ACCURACY: {accu:2.6f}".format(error=l_train, accu=acc_train))
-            logging.info("####################################################################################")
+            print("####################################################################################")
+            print("EPOCH: {epch}".format(epch=epoch))
+            print("------------------------------------------------------------------------------------")
+            print("TRAIN LOSS: {error:2.6f}\nTRAIN ACCURACY: {accu:2.6f}".format(error=l_train, accu=acc_train))
+            print("####################################################################################")
             # history['val'].append((l, acc))
+            logging.info("TRAIN LOSS: {error:2.6f}\nTRAIN ACCURACY: {accu:2.6f}".format(error=l_train, accu=acc_train))
             history['train'].append((l_train, acc_train))
 
     return model, history
