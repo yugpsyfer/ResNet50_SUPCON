@@ -90,9 +90,6 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             loss.backward()
             optimizer.step()
 
-            if epoch<1:
-                print(loss)
-
         if epoch % 5 == 0:
             # l, acc = validate(train_dl, model, dev, criterion)
             l_train = validate(train_dl, model, dev, criterion)
