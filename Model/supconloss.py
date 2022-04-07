@@ -73,9 +73,10 @@ class SupConLoss(nn.Module):
             self.temperature)
         # for numerical stability
         print("================================")
-        print(anchor_dot_contrast)
-        9 / 0
+
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
+        print(logits_max)
+        9 / 0
         logits = anchor_dot_contrast - logits_max.detach()
 
         # tile mask
