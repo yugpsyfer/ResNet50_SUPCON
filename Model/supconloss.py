@@ -66,12 +66,15 @@ class SupConLoss(nn.Module):
         print(anchor_feature.shape)
         print(contrast_feature.shape)
         print(anchor_feature)
-        9/0
+
         # compute logits
         anchor_dot_contrast = torch.div(
             torch.matmul(anchor_feature, contrast_feature.T),
             self.temperature)
         # for numerical stability
+        print("================================")
+        print(anchor_dot_contrast)
+        9 / 0
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
         logits = anchor_dot_contrast - logits_max.detach()
 
