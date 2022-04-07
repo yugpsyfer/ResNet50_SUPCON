@@ -17,7 +17,7 @@ import logging
 import time
 
 log_path = './Outputs/Logs/'
-logging.basicConfig(log_path + 'Run.log', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(filename=log_path + 'Run.log', encoding='utf-8', level=logging.INFO)
 
 output_model_path = "./Outputs/Pretrained_Models/"
 criterion_options = dict()
