@@ -78,7 +78,8 @@ class MiniImageNet(Dataset):
         files = self.allFiles[index]
         file_name = files.split("_")[0]
         label = torch.tensor(data=self.label_dict[file_name])
-        _embedding_ = torch.tensor(data=self.embeddings[file_name].flatten(), dtype=torch.double)
+        _embedding_ = torch.nn.functional.normalize(torch.tensor(data=self.embeddings[file_name].flatten(),
+                                                                 dtype=torch.double))
         embedding = [_embedding_, _embedding_]
         with Image.open(self.rootDir + files) as im:
             data = self.tensorTransformation(im)

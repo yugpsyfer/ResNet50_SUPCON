@@ -99,7 +99,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             print("TRAIN LOSS: {error:2.6f}".format(error=l_train))
             print("####################################################################################")
             # history['val'].append((l, acc))
-            logging.info("TRAIN LOSS: {error:2.6f".format(error=l_train))
+            logging.info("TRAIN LOSS: {error:2.6f}".format(error=l_train))
             history['train'].append(l_train)
 
     return model, history
