@@ -82,8 +82,8 @@ class MiniImageNet(Dataset):
         embedding = torch.cat((_embedding_, _embedding_), dim=0)
 
         with Image.open(self.rootDir + files) as im:
-            z = im.resize((32, 32))
-            z = np.array(z)
-            data = self.tensorTransformation(z)
+            # z = im.resize((32, 32))
+            #z = np.array(z)
+            data = self.tensorTransformation(im)
 
         return data, label, embedding  # Return a tuple format (data,label)
