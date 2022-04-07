@@ -152,7 +152,6 @@ if __name__ == '__main__':
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion)
     logging.info("STARTING TRAINING==================")
-    logging.info()
     start_time = time()
 
     trained_model, history = training.train(train_dl=train_dl, val_dl=val_dl,
