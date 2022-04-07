@@ -13,6 +13,11 @@ from Model import training
 from Data.mini_imagenet import MiniImageNet
 import matplotlib.pyplot as plt
 import importlib
+import logging
+import time
+
+log_path = './Outputs/Logs/'
+logging.basicConfig(log_path + 'Run.log', encoding='utf-8', level=logging.INFO)
 
 output_model_path = "./Outputs/Pretrained_Models/"
 criterion_options = dict()
@@ -63,13 +68,13 @@ def get_cuda_device():
         count = torch.cuda.device_count()
         for i in range(count):
             try:
-                print("Trying CUDA device " + str(i))
+                logging.info("Trying CUDA device " + str(i))
                 device = torch.device('cuda:'+str(i))
                 test_tensor = test_tensor.to(device)
-                print("Using CUDA device "+str(i))
+                logging.info("Using CUDA device "+str(i))
                 break
             except BaseException:
-                print("Cuda Device "+str(i)+" is busy. Trying other devices")
+                logging.info("Cuda Device "+str(i)+" is busy. Trying other devices")
     else:
         raise EnvironmentError("CUDA NOT AVAILABLE")
 
@@ -79,27 +84,26 @@ def get_cuda_device():
 
 def prepare_dataloader(dataset_class, batch_size, crit):
     dataset = dataset_class(root_dir="./Inputs/mini_image_net_merged/", label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
-    val_size = int(len(dataset) * 0.1)
-    train_size = len(dataset) - int(len(dataset) * 0.1)
-    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+    # val_size = int(len(dataset) * 0.1)
+    # train_size = len(dataset) - int(len(dataset) * 0.1)
+    # train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-    train_ = DataLoader(train_set, batch_size=batch_size, shuffle=True)
-    val_ = DataLoader(val_set, batch_size=batch_size, shuffle=True)
+    train_ = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # val_ = DataLoader(val_set, batch_size=batch_size, shuffle=True)
 
-    return train_, val_
+    return train_, None
 
 
 def draw_and_save_plots(history_, ep):
     plot_path = "./Outputs/plots/"
-    train = [i for i in history_['train']]
-    val = [i[0] for i in history_['val']]
+    train = [i[1] for i in history_['train']]
 
     epo = np.linspace(start=0, stop=ep, num=50)
 
     plt.figure(figsize=(10, 10))
 
     plt.plot(epo, train, color='blue', label='Train LOSS VS EPOCHS', linewidth=2, linestyle='dashed')
-    plt.plot(epo, val, color='red', label='Validation LOSS VS EPOCHS', linewidth=2, linestyle='dashed')
+    # plt.plot(epo, val, color='red', label='Validation LOSS VS EPOCHS', linewidth=2, linestyle='dashed')
 
     plt.xlabel("EPOCHS")
     plt.ylabel("LOSS")
@@ -147,11 +151,19 @@ if __name__ == '__main__':
     model.to(dev)
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion)
+    logging.info("STARTING TRAINING==================")
+    logging.info()
+    start_time = time()
 
     trained_model, history = training.train(train_dl=train_dl, val_dl=val_dl,
                                             criterion=criterion, epochs=epochs,
                                             optimizer=optimizer, dev=dev, model=model)
 
+    end_time = time()
+    seconds_elapsed = end_time - start_time
+    hours, rest = divmod(seconds_elapsed, 3600)
+
+    logging.info("TIME REQUIRED TO TRAIN THE MODEL:"+hours+" hrs")
     draw_and_save_plots(history_=history, ep=epochs)
 
     model_save_path = os.path.join(output_model_path, opt.loss_criterion + ".pth")

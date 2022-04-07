@@ -19,12 +19,13 @@ class SupConLoss(nn.Module):
         self.base_temperature = base_temperature
         self.device = device
 
-    def forward(self, features, labels=None, mask=None):
+    def forward(self, features, embeddings,  labels=None, mask=None):
         """Compute loss for model. If both `labels` and `mask` are None,
         it degenerates to SimCLR unsupervised loss:
         https://arxiv.org/pdf/2002.05709.pdf
         Args:
             features: hidden vector of shape [bsz, n_views, ...].
+            embeddings: embeddings of KG
             labels: ground truth of shape [bsz].
             mask: contrastive mask of shape [bsz, bsz], mask_{i,j}=1 if sample j
                 has the same class as sample i. Can be asymmetric.
@@ -52,13 +53,13 @@ class SupConLoss(nn.Module):
         else:
             mask = mask.float().to(device)
 
-        contrast_count = labels.shape[1]    #Changed
-        contrast_feature = torch.cat(torch.unbind(labels, dim=1), dim=0)    #Changed
+        contrast_count = features.shape[1]
+        contrast_feature = torch.cat(torch.unbind(features, dim=1), dim=0)
         if self.contrast_mode == 'one':
             anchor_feature = features[:, 0]
             anchor_count = 1
         elif self.contrast_mode == 'all':
-            anchor_feature = contrast_feature
+            anchor_feature = torch.cat(torch.unbind(embeddings, dim=1), dim=0) #CHANGED
             anchor_count = contrast_count
         else:
             raise ValueError('Unknown mode: {}'.format(self.contrast_mode))
