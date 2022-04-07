@@ -63,16 +63,13 @@ class SupConLoss(nn.Module):
             anchor_count = contrast_count
         else:
             raise ValueError('Unknown mode: {}'.format(self.contrast_mode))
-        print(anchor_feature.shape)
-        print(contrast_feature.shape)
-        print(anchor_feature)
 
         # compute logits
         anchor_dot_contrast = torch.div(
             torch.matmul(anchor_feature, contrast_feature.T),
             self.temperature)
         # for numerical stability
-        print("================================")
+
 
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
         logits = anchor_dot_contrast - logits_max.detach()
@@ -94,10 +91,9 @@ class SupConLoss(nn.Module):
 
         # compute mean of log-likelihood over positive
         mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1)
-        print(mean_log_prob_pos)
+
         # loss
         loss = - (self.temperature / self.base_temperature) * mean_log_prob_pos
         loss = loss.view(anchor_count, batch_size).mean()
-        print(loss)
-        9 / 0
+
         return loss
