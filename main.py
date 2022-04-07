@@ -148,6 +148,7 @@ if __name__ == '__main__':
     else:
         pass
 
+    model.double()
     model.to(dev)
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion)

@@ -62,6 +62,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
                 embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
                 embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
+                images = image.type(torch.DoubleTensor)
                 embeddings = embeddings.to(dev)
             elif criterion[1] == "CE":
                 images, labels = batch
