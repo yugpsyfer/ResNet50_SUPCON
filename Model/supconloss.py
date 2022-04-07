@@ -75,8 +75,6 @@ class SupConLoss(nn.Module):
         print("================================")
 
         logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
-        print(logits_max)
-        9 / 0
         logits = anchor_dot_contrast - logits_max.detach()
 
         # tile mask
@@ -89,7 +87,8 @@ class SupConLoss(nn.Module):
             0
         )
         mask = mask * logits_mask
-
+        print(mask)
+        9 / 0
         # compute log_prob
         exp_logits = torch.exp(logits) * logits_mask
         log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
