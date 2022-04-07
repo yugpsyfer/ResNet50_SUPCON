@@ -86,6 +86,4 @@ class MiniImageNet(Dataset):
 
         data = torch.cat((data[0], data[1]), dim=0)
 
-        print(data.shape)
-        9/0
         return (data, label, embedding)  # Return a tuple format (data,label)
