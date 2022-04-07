@@ -65,7 +65,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
     history['train'] = []
 
     for epoch in range(epochs):
-
+        
         for batch in train_dl:
             optimizer.zero_grad()
 
@@ -89,6 +89,9 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             loss = calculate_loss(criterion, labels, out, embeddings)
             loss.backward()
             optimizer.step()
+
+            if epoch<1:
+                print(loss)
 
         if epoch % 5 == 0:
             # l, acc = validate(train_dl, model, dev, criterion)
