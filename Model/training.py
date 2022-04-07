@@ -60,6 +60,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             if criterion[0] == "SupCon":
                 images, labels, embeddings = batch
                 embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
+                embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
                 embeddings = embeddings.to(dev)
             elif criterion[1] == "CE":
