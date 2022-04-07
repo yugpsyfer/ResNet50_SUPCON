@@ -59,7 +59,7 @@ class SupConLoss(nn.Module):
             anchor_feature = features[:, 0]
             anchor_count = 1
         elif self.contrast_mode == 'all':
-            anchor_feature = torch.cat(torch.unbind(embeddings, dim=1), dim=0) #CHANGED
+            anchor_feature = embeddings   #torch.cat(torch.unbind(embeddings, dim=1), dim=0) #CHANGED
             anchor_count = contrast_count
         else:
             raise ValueError('Unknown mode: {}'.format(self.contrast_mode))
