@@ -14,7 +14,7 @@ from Data.mini_imagenet import MiniImageNet
 import matplotlib.pyplot as plt
 import importlib
 import logging
-import time
+from time import time
 
 log_path = './Outputs/Logs/'
 logging.basicConfig(filename=log_path + 'Run.log', encoding='utf-8', level=logging.INFO)
