@@ -79,7 +79,6 @@ def get_cuda_device():
     else:
         raise EnvironmentError("CUDA NOT AVAILABLE")
 
-
     return device
 
 

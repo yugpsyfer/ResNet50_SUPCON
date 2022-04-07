@@ -78,12 +78,13 @@ class MiniImageNet(Dataset):
         files = self.allFiles[index]
         file_name = files.split("_")[0]
         label = torch.tensor(data=self.label_dict[file_name])
-        _embedding_ = torch.tensor(data=[self.embeddings[file_name].flatten()], dtype=torch.double)
-        embedding = torch.cat((_embedding_, _embedding_), dim=0)
-
+        _embedding_ = torch.tensor(data=self.embeddings[file_name].flatten(), dtype=torch.double)
+        # embedding = torch.cat((_embedding_, _embedding_), dim=0)
+        # embedding = torch.fr
         with Image.open(self.rootDir + files) as im:
             data = self.tensorTransformation(im)
 
-        data = torch.cat((data[0], data[1]), dim=0)
-
+        # data = torch.cat((data[0], data[1]), dim=0)
+        print(data[0].shape)
+        9/0
         return (data, label, embedding)  # Return a tuple format (data,label)
