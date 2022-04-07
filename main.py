@@ -45,7 +45,7 @@ def make_model_(pretrain, criterion_loss, model_name):
     layers = list(model_with_fc.model_.children())[:-1]
     if pretrain:
         if criterion_loss == "SupCon":
-            model_with_fc.model_.fc = nn.Linear(in_features=2048, out_features=300, bias=True)
+            model_with_fc.model_.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True), nn.ReLU())
             final_model = model_with_fc.model_
 
         elif criterion_loss == "CE":

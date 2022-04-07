@@ -65,7 +65,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
     history['train'] = []
 
     for epoch in range(epochs):
-        
+
         for batch in train_dl:
             optimizer.zero_grad()
 
