@@ -51,7 +51,7 @@ def validate(val_dl, model, dev, criterion):
         # labels = labels.numpy().flatten()
         #
         # acc = accuracy_score(y_true=labels, y_pred=pred)
-
+        loss = torch.nan_to_num(loss)
         net_loss += loss.item()
         # net_accuracy += acc
         count += 1
