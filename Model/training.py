@@ -3,7 +3,7 @@ from sklearn.metrics import accuracy_score
 import logging
 
 
-def calculate_loss(criterion, labels_true, out, embeddings_):
+def calculate_loss(criterion, labels_true, out, embeddings_=None):
     loss_name = criterion[0]
     loss_func = criterion[1]
 
@@ -35,6 +35,7 @@ def validate(val_dl, model, dev, criterion):
             embeddings = embeddings.to(dev)
 
         elif criterion[1] == "CE":
+            embeddings = None
             images, labels = batch
 
         images = images.to(dev)
@@ -42,7 +43,7 @@ def validate(val_dl, model, dev, criterion):
         labels = labels.to(dev)
 
         out = model(images)
-        loss = calculate_loss(criterion, labels, out)
+        loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
 
         # pred = torch.argmax(out, dim=1).cpu()
         # pred = pred.numpy().flatten()
@@ -77,6 +78,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
                 embeddings = embeddings.to(dev)
 
             elif criterion[1] == "CE":
+                embeddings = None
                 images, labels = batch
 
             images = images.to(dev)

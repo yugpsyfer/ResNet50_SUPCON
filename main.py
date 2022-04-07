@@ -70,9 +70,11 @@ def get_cuda_device():
         for i in range(count):
             try:
                 logging.info("Trying CUDA device " + str(i))
+                print("Trying CUDA device " + str(i))
                 device = torch.device('cuda:'+str(i))
                 test_tensor = test_tensor.to(device)
                 logging.info("Using CUDA device "+str(i))
+                print("Using CUDA device "+str(i))
                 break
             except BaseException:
                 logging.info("Cuda Device "+str(i)+" is busy. Trying other devices")
