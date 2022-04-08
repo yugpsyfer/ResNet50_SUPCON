@@ -58,7 +58,7 @@ def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
 
 
 def pre_training(opt):
-    # dev = get_cuda_device()
+    dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion)
     if opt.loss_criterion == "SupCon":
         model = mm.model
