@@ -36,6 +36,7 @@ def validate(val_dl, model, dev, criterion):
         elif criterion[0] == "CE":
             embeddings = None
             images, labels = batch
+            images = images.type(torch.DoubleTensor)
 
         images = images.to(dev)
         labels = labels.type(torch.LongTensor)
@@ -85,6 +86,7 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
             elif criterion[0] == "CE":
                 embeddings = None
                 images, labels = batch
+                images = images.type(torch.DoubleTensor)
             else:
                 raise ValueError("ERROR LOSS FUNCTION")
 
