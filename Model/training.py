@@ -33,7 +33,7 @@ def validate(val_dl, model, dev, criterion):
             images = images.type(torch.DoubleTensor)
             embeddings = embeddings.to(dev)
 
-        elif criterion[1] == "CE":
+        elif criterion[0] == "CE":
             embeddings = None
             images, labels = batch
 
