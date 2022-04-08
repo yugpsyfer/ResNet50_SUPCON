@@ -82,9 +82,11 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
                 images = images.type(torch.DoubleTensor)
                 embeddings = embeddings.to(dev)
 
-            elif criterion[1] == "CE":
+            elif criterion[0] == "CE":
                 embeddings = None
                 images, labels = batch
+            else:
+                raise ValueError("ERROR LOSS FUNCTION")
 
             images = images.to(dev)
             labels = labels.type(torch.LongTensor)
