@@ -67,7 +67,8 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
     model.train()
     history = dict()
     history['train'] = []
-
+    images = None
+    labels = None
     for epoch in range(epochs):
 
         for batch in train_dl:
