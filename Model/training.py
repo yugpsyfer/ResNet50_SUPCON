@@ -1,6 +1,6 @@
 import torch
 from sklearn.metrics import accuracy_score
-import logging
+import wandb
 
 
 def calculate_loss(criterion, labels_true, out, embeddings_=None):
@@ -21,7 +21,6 @@ def calculate_loss(criterion, labels_true, out, embeddings_=None):
 @torch.no_grad()
 def validate(val_dl, model, dev, criterion):
     net_loss = 0
-    # net_accuracy = 0
     count = 0
 
     for batch in val_dl:
@@ -45,21 +44,26 @@ def validate(val_dl, model, dev, criterion):
         out = model(images)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
 
-        # pred = torch.argmax(out, dim=1).cpu()
-        # pred = pred.numpy().flatten()
-        # labels = labels.cpu()
-        # labels = labels.numpy().flatten()
-        #
-        # acc = accuracy_score(y_true=labels, y_pred=pred)
         loss = torch.nan_to_num(loss)
         net_loss += loss.item()
-        # net_accuracy += acc
+
         count += 1
 
     return net_loss / count
 
 
-def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
+def train(train_dl, epochs, optimizer, model, dev, criterion):
+
+    config = dict(
+        epochs=epochs,
+        criterion=criterion[0],
+        learning_rate=optimizer.state_dict()['param_groups'][0]['lr'],
+        model="ResNet-50"
+    )
+
+    wandb.init(project="KG-NN Transfer learning Redo", config=config)
+    wandb.watch(model, log_freq=100)
+
     model.train()
     history = dict()
     history['train'] = []
@@ -91,18 +95,37 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion):
             optimizer.step()
 
         if epoch % 50 == 0:
-            # l, acc = validate(train_dl, model, dev, criterion)
             l_train = validate(train_dl, model, dev, criterion)
-            print("####################################################################################")
-            print("EPOCH: {epch}".format(epch=epoch))
-            print("------------------------------------------------------------------------------------")
-            print("TRAIN LOSS: {error:2.6f}".format(error=l_train))
-            print("####################################################################################")
-            # history['val'].append((l, acc))
-            logging.info("TRAIN LOSS: {error:2.6f}".format(error=l_train))
-            history['train'].append(l_train)
+            wandb.log({"Average_Loss": l_train})
 
-    return model, history
+    return model
 
 
+@torch.no_grad()
+def test(val_dl, model, dev):
+    net_loss = 0
+    net_accuracy = 0
+    count = 0
 
+    for batch in val_dl:
+        images, labels = batch
+
+        images = images.to(dev)
+        labels = labels.type(torch.LongTensor)
+        labels = labels.to(dev)
+
+        out = model(images)
+        loss = calculate_loss("CE", labels, out, embeddings_=None)
+
+        pred = torch.argmax(out, dim=1).cpu()
+        pred = pred.numpy().flatten()
+        labels = labels.cpu()
+        labels = labels.numpy().flatten()
+
+        acc = accuracy_score(y_true=labels, y_pred=pred)
+        loss = torch.nan_to_num(loss)
+        net_loss += loss.item()
+        net_accuracy += acc
+        count += 1
+
+    return net_loss / count, net_accuracy / count
