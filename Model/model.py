@@ -20,16 +20,15 @@ class ResNet:
         model_with_fc = models.resnet50(pretrained=False)
 
         if self.criterion_loss == "SupCon":
-            model_with_fc.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True),
-                                                    nn.ReLU())
+            model_with_fc.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True), nn.ReLU())
             final_model = model_with_fc
 
         elif self.criterion_loss == "CE":
             model_with_fc.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True),
-                                                    nn.ReLU(),
-                                                    nn.Linear(in_features=300, out_features=100, bias=True),
-                                                    nn.Softmax(dim=1))
-            final_model = model_with_fc.model_
+                                             nn.ReLU(),
+                                             nn.Linear(in_features=300, out_features=100, bias=True),
+                                             nn.Softmax(dim=1))
+            final_model = model_with_fc
         else:
             raise ValueError("LOSS NOT SUPPORTED")
 
