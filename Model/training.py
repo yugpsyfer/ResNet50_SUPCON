@@ -21,6 +21,7 @@ def calculate_loss(criterion, labels_true, out, embeddings_=None):
 @torch.no_grad()
 def validate(val_dl, model, dev, criterion):
     net_loss = 0
+    net_accuracy = 0
     count = 0
 
     for batch in val_dl:
@@ -45,12 +46,20 @@ def validate(val_dl, model, dev, criterion):
         out = model(images)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
 
+        if criterion[2] == 1:
+            predicted = torch.argmax(out, dim=1).cpu()
+            predicted = predicted.numpy().flatten()
+            labels = labels.cpu()
+            labels = labels.numpy().flatten()
+            acc = accuracy_score(y_true=labels, y_pred=predicted)
+            net_accuracy += acc
+
         loss = torch.nan_to_num(loss)
         net_loss += loss.item()
 
         count += 1
 
-    return net_loss / count
+    return net_loss / count, net_accuracy / count
 
 
 def train(train_dl, epochs, optimizer, model, dev, criterion):
@@ -58,18 +67,18 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
     config = dict(
         epochs=epochs,
         criterion=criterion[0],
+        optimizer=optimizer.__str__().split(" ")[0],
         learning_rate=optimizer.state_dict()['param_groups'][0]['lr'],
-        model="ResNet-50"
+        model="ResNet-50",
+        dataset="MiniImagenet"
     )
 
-    wandb.init(project="KG-NN Transfer learning Redo", config=config)
+    wandb.init(project="KG-NN Transfer learning Redo", config=config, entity="thesis-yugansh")
     wandb.watch(model, log_freq=100)
 
     model.train()
     history = dict()
     history['train'] = []
-    images = None
-    labels = None
     for epoch in range(epochs):
 
         for batch in train_dl:
@@ -99,9 +108,13 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
             loss.backward()
             optimizer.step()
 
-        if epoch % 50 == 0:
-            l_train = validate(train_dl, model, dev, criterion)
+        l_train, acc = validate(train_dl, model, dev, criterion)
+
+        if criterion[2] == 0:
             wandb.log({"Average_Loss": l_train})
+        else:
+            wandb.log({"Average_Loss": l_train,
+                       "Accuracy": acc})
 
     return model
 

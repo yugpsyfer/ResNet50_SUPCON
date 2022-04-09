@@ -69,7 +69,7 @@ def pre_training(opt):
         optimizer = optimr.SGD(lr=l_r, params=model.parameters())
         epochs = criterion_options['SupCon']['epochs']
         criterion = ["SupCon", SupConLoss(temperature=temperature, contrast_mode='all',
-                                          base_temperature=base_temperature, device=dev)]
+                                          base_temperature=base_temperature, device=dev), 0]
 
     elif opt.loss_criterion == "CE":
         model = mm.model
@@ -77,7 +77,7 @@ def pre_training(opt):
         l_r = criterion_options['CE']['learning_rate']
         optimr = importlib.import_module("torch.optim." + criterion_options['CE']['optimizer'])
         optimizer = optimr.SGD(lr=l_r, params=model.parameters())
-        criterion = ["CE", F.cross_entropy]
+        criterion = ["CE", F.cross_entropy, 0]
     else:
         raise NameError("Loss not supported")
 
@@ -88,7 +88,7 @@ def pre_training(opt):
     start_time = time()
 
     pretrained_model = train(train_dl=train_dl, criterion=criterion, epochs=epochs,
-                          optimizer=optimizer, dev=dev, model=model)
+                             optimizer=optimizer, dev=dev, model=model)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
@@ -102,7 +102,7 @@ def linear_phase_training(opt):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion, model_name=opt.model_name)
     model = mm.model
-
+    criterion = ["CE", F.cross_entropy, 1]
     if opt.loss_criterion == "SupCon":
         epochs = criterion_options['SupCon']['epochs']
     else:
@@ -120,7 +120,7 @@ def linear_phase_training(opt):
     start_time = time()
 
     trained_model = train(train_dl=train_dl, epochs=epochs, optimizer=optimizer,
-                          dev=dev, model=model, criterion="CE")
+                          dev=dev, model=model, criterion=criterion)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
