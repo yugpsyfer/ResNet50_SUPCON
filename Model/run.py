@@ -109,7 +109,7 @@ def linear_phase_training(opt):
         epochs = criterion_options['CE']['epochs']
 
     l_r = 0.0004
-    optimizer = optim.Adam(params=model.parameters(), l_r=l_r)
+    optimizer = optim.Adam(params=model.parameters(), lr=l_r)
 
     train_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
     model.double()
