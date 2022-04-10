@@ -58,14 +58,14 @@ class ResNet:
         return final_model
 
     def _load_pretrained_model(self):
-        output_model_path = '../Outputs/Models/'
+        output_model_path = './Outputs/Models/'
         load_path = os.path.join(output_model_path, self.model_name)
         model_ = torch.load(load_path)
 
         return model_
 
     def _load_trained_model(self):
-        output_model_path = '../Outputs/Models/'
+        output_model_path = './Outputs/Models/'
         load_path = os.path.join(output_model_path, self.model_name)
         model_ = torch.load(load_path)
 
