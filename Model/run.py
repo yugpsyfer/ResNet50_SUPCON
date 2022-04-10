@@ -94,7 +94,7 @@ def pre_training(opt):
     hours, rest = divmod(seconds_elapsed, 3600)
     logging.info("TIME REQUIRED TO PRETRAIN THE MODEL:" + str(hours) + " hrs")
 
-    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + ".pth")
+    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + ".pt")
     save_model(model_save_path, pretrained_model)
 
 
@@ -127,7 +127,7 @@ def linear_phase_training(opt):
 
     logging.info("TIME REQUIRED TO TRAIN THE MODEL:" + str(hours) + " hrs")
 
-    model_save_path = os.path.join(output_model_path, "trained_"+opt.loss_criterion + ".pth")
+    model_save_path = os.path.join(output_model_path, "trained_"+opt.loss_criterion + ".pt")
     save_model(model_save_path, trained_model)
 
 
