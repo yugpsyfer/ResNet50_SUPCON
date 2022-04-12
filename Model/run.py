@@ -15,16 +15,6 @@ import importlib
 source_dataset_path = "./Inputs/mini_image_net_merged/"
 target_dataset_path = "./Output/Target/imagenet_v2/"
 output_model_path = "Outputs/Models/"
-criterion_options = dict()
-criterion_options['SupCon'] = {"epochs": 1000,
-                               "temperature": 0.5,
-                               "annealing": "cosine",
-                               "learning_rate": 0.5,
-                               "optimizer": "sgd"}
-
-criterion_options['CE'] = {"epochs": 500,
-                           "optimizer": "sgd",
-                           "learning_rate": 0.8}
 
 
 def get_cuda_device():
@@ -50,16 +40,21 @@ def get_cuda_device():
 
 
 def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
-    dataset = dataset_class(root_dir= ds_path, label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
+    dataset = dataset_class(root_dir=ds_path, label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
+    val_size = int(len(dataset) * 0.1)
+    train_size = len(dataset) - int(len(dataset) * 0.1)
 
-    train_ = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_ = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    val_ = DataLoader(val_set, batch_size=batch_size, shuffle=True)
 
-    return train_
+    return train_, val_
 
 
-def pre_training(opt):
+def pre_training(opt, config, criterion_options):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion)
+
     if opt.loss_criterion == "SupCon":
         model = mm.model
         temperature = criterion_options['SupCon']['temperature']
@@ -81,24 +76,25 @@ def pre_training(opt):
     else:
         raise NameError("Loss not supported")
 
-    train_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion, source_dataset_path)
+    train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion, source_dataset_path)
     model.double()
     model.to(dev)
-    logging.info("STARTING PRETRAINING==================")
+    logging.info("STARTING PRETRAINING")
+    print("STARTING PRETRAINING")
     start_time = time()
 
-    pretrained_model = train(train_dl=train_dl, criterion=criterion, epochs=epochs,
-                             optimizer=optimizer, dev=dev, model=model)
+    pretrained_model = train(train_dl=train_dl, val_dl=val_dl, criterion=criterion, epochs=epochs,
+                             optimizer=optimizer, dev=dev, model=model, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
     logging.info("TIME REQUIRED TO PRETRAIN THE MODEL:" + str(hours) + " hrs")
 
-    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + ".pt")
+    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + str(end_time) + ".pt")
     save_model(model_save_path, pretrained_model)
 
 
-def linear_phase_training(opt):
+def linear_phase_training(opt, config, criterion_options):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion, model_name=opt.model_name)
     model = mm.model
@@ -111,7 +107,7 @@ def linear_phase_training(opt):
     l_r = 0.0004
     optimizer = optim.Adam(params=model.parameters(), lr=l_r)
 
-    train_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
+    train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
     model.double()
     model.to(dev)
 
@@ -119,8 +115,8 @@ def linear_phase_training(opt):
     logging.info("STARTING TRAINING==================")
     start_time = time()
 
-    trained_model = train(train_dl=train_dl, epochs=epochs, optimizer=optimizer,
-                          dev=dev, model=model, criterion=criterion)
+    trained_model = train(train_dl=train_dl, val_dl=val_dl, epochs=epochs, optimizer=optimizer,
+                          dev=dev, model=model, criterion=criterion, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)

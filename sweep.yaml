@@ -1,0 +1,9 @@
+program: main.py
+method: grid
+parameters:
+  dropout:
+  learning_rate:
+    values: [0.2, 0.3, 0.1, 0.5]
+early_terminate:
+  type: hyperband
+  max_iter: 50

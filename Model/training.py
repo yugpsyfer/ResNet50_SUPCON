@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import accuracy_score
 import wandb
-
+import time
 
 def calculate_loss(criterion, labels_true, out, embeddings_=None):
     loss_name = criterion[0]
@@ -62,19 +62,10 @@ def validate(val_dl, model, dev, criterion):
     return net_loss / count, net_accuracy / count
 
 
-def train(train_dl, epochs, optimizer, model, dev, criterion):
+def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
 
-    config = dict(
-        epochs=epochs,
-        criterion=criterion[0],
-        optimizer=optimizer.__str__().split(" ")[0],
-        learning_rate=optimizer.state_dict()['param_groups'][0]['lr'],
-        model="ResNet-50",
-        dataset="MiniImagenet"
-    )
-
-    wandb.init(project="KG-NN Transfer learning Redo", config=config, entity="thesis-yugansh")
-    wandb.watch(model, log_freq=100)
+    wandb.watch(model, log_freq=10)
+    wandb.run.name = config['criterion'] + str(int(time))
 
     model.train()
     history = dict()
@@ -108,13 +99,16 @@ def train(train_dl, epochs, optimizer, model, dev, criterion):
             loss.backward()
             optimizer.step()
 
-        l_train, acc = validate(train_dl, model, dev, criterion)
-
-        if criterion[2] == 0:
-            wandb.log({"Average_Loss": l_train})
-        else:
-            wandb.log({"Average_Loss": l_train,
-                       "Accuracy": acc})
+        if epoch % 2 == 0:
+            l_val, acc_val = validate(val_dl, model, dev, criterion)
+            l_train, acc_train = validate(train_dl, model, dev, criterion)
+            # if criterion[] == 0:
+            #     wandb.log({"Average_Loss": l_val*100})
+            # else:
+            wandb.log({"Validation Loss": l_val*100,
+                       "Validation Accuracy": acc_val*100,
+                       "Training Loss": l_train*100,
+                       "Training Accuracy": acc_train})
 
     return model
 

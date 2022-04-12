@@ -24,9 +24,9 @@ class ResNet:
             final_model = model_with_fc
 
         elif self.criterion_loss == "CE":
-            model_with_fc.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=300, bias=True),
-                                             nn.ReLU(),
-                                             nn.Linear(in_features=300, out_features=100, bias=True),
+            model_with_fc.fc = nn.Sequential(nn.Linear(in_features=2048, out_features=100, bias=True),
+                                             # nn.ReLU(),
+                                             # nn.Linear(in_features=300, out_features=100, bias=True),
                                              nn.Softmax(dim=1))
             final_model = model_with_fc
         else:
