@@ -65,7 +65,7 @@ def validate(val_dl, model, dev, criterion):
 def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
 
     wandb.watch(model, log_freq=10)
-    wandb.run.name = config['criterion'] + str(int(time))
+    wandb.run.name = config['criterion'] + str(int(time()))
 
     model.train()
     history = dict()
