@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import accuracy_score
 import wandb
-import time
+from time import time
 
 def calculate_loss(criterion, labels_true, out, embeddings_=None):
     loss_name = criterion[0]
