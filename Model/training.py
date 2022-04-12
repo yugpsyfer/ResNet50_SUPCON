@@ -46,13 +46,13 @@ def validate(val_dl, model, dev, criterion):
         out = model(images)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
 
-        if criterion[2] == 1:
-            predicted = torch.argmax(out, dim=1).cpu()
-            predicted = predicted.numpy().flatten()
-            labels = labels.cpu()
-            labels = labels.numpy().flatten()
-            acc = accuracy_score(y_true=labels, y_pred=predicted)
-            net_accuracy += acc
+        # if criterion[2] == 1:
+        predicted = torch.argmax(out, dim=1).cpu()
+        predicted = predicted.numpy().flatten()
+        labels = labels.cpu()
+        labels = labels.numpy().flatten()
+        acc = accuracy_score(y_true=labels, y_pred=predicted)
+        net_accuracy += acc
 
         loss = torch.nan_to_num(loss)
         net_loss += loss.item()
