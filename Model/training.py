@@ -105,10 +105,10 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
             # if criterion[] == 0:
             #     wandb.log({"Average_Loss": l_val*100})
             # else:
-            wandb.log({"Validation Loss": l_val*100,
+            wandb.log({"Validation Loss": l_val,
                        "Validation Accuracy": acc_val*100,
-                       "Training Loss": l_train*100,
-                       "Training Accuracy": acc_train})
+                       "Training Loss": l_train,
+                       "Training Accuracy": acc_train*100})
 
     return model
 
