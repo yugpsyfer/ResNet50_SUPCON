@@ -3,6 +3,7 @@ from sklearn.metrics import accuracy_score
 import wandb
 from time import time
 
+
 def calculate_loss(criterion, labels_true, out, embeddings_=None):
     loss_name = criterion[0]
     loss_func = criterion[1]

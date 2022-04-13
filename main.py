@@ -28,9 +28,9 @@ if __name__ == '__main__':
                                    "learning_rate": 0.5,
                                    "optimizer": "sgd"}
 
-    criterion_options['CE'] = {"epochs": 150,
+    criterion_options['CE'] = {"epochs": 250,
                                "optimizer": "sgd",
-                               "learning_rate": 0.2}
+                               "learning_rate": 0.1}
 
     config = dict(
         epochs=criterion_options[opt.loss_criterion]['epochs'],
