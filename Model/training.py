@@ -67,7 +67,8 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
 
     wandb.watch(model, log_freq=10)
     wandb.run.name = config['criterion'] + str(int(time()))
-
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=1000, eta_min=0, last_epoch=-1,
+                                                           verbose=False)
     model.train()
     history = dict()
     history['train'] = []
@@ -110,7 +111,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
                        "Validation Accuracy": acc_val*100,
                        "Training Loss": l_train,
                        "Training Accuracy": acc_train*100})
-
+        scheduler.step()
     return model
 
 
