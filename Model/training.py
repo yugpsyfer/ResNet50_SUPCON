@@ -67,7 +67,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
 
     wandb.watch(model, log_freq=10)
     wandb.run.name = config['criterion'] + str(int(time()))
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=1000, eta_min=0, last_epoch=-1,
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=0, last_epoch=-1,
                                                            verbose=False)
     model.train()
     history = dict()
@@ -101,7 +101,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
             loss.backward()
             optimizer.step()
 
-        if epoch % 2 == 0:
+        if epoch % 1 == 0:
             l_val, acc_val = validate(val_dl, model, dev, criterion)
             l_train, acc_train = validate(train_dl, model, dev, criterion)
             # if criterion[] == 0:
