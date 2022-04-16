@@ -28,7 +28,7 @@ if __name__ == '__main__':
                                    "learning_rate": 0.5,
                                    "optimizer": "sgd"}
 
-    criterion_options['CE'] = {"epochs": 250,
+    criterion_options['CE'] = {"epochs": 500,
                                "optimizer": "sgd",
                                "learning_rate": 0.1}
 
