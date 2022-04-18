@@ -105,6 +105,11 @@ def linear_phase_training(opt, config, criterion_options):
         epochs = criterion_options['CE']['epochs']
 
     l_r = 0.0004
+    config['learning_rate'] = 0.0004
+    config['optimizer'] = "adam"
+    criterion_options['CE']["optimizer"] = "adam"
+    criterion_options['CE']["learning_rate"] = 0.0004
+
     optimizer = optim.Adam(params=model.parameters(), lr=l_r)
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
