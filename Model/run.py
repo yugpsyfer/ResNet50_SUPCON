@@ -90,7 +90,7 @@ def pre_training(opt, config, criterion_options):
     hours, rest = divmod(seconds_elapsed, 3600)
     logging.info("TIME REQUIRED TO PRETRAIN THE MODEL:" + str(hours) + " hrs")
 
-    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + str(end_time) + ".pt")
+    model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + str(int(start_time)) + ".pt")
     save_model(model_save_path, pretrained_model)
 
 
