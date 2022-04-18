@@ -49,10 +49,15 @@ class ResNet:
             pretrained_model = self._load_pretrained_model()
             for param in pretrained_model.parameters():
                 param.requires_grad = False
-            new_linear = nn.Linear(in_features=100, out_features=100, bias=True)
-            nn.init.xavier_uniform_(new_linear.weight)
-            pretrained_model.fc[1] = new_linear
-            pretrained_model.fc.add_module(name="2", module=nn.Softmax(dim=1))
+            new_linear_1 = nn.Linear(in_features=100, out_features=1000, bias=True)
+            new_linear_2 = nn.Linear(in_features=1000, out_features=100, bias=True)
+            nn.init.xavier_uniform_(new_linear_1.weight)
+            nn.init.xavier_uniform_(new_linear_2.weight)
+            pretrained_model.fc[1] = nn.ReLU()
+            pretrained_model.fc.add_module(name="2", module=new_linear_1)
+            pretrained_model.fc.add_module(name="3", module=nn.ReLU())
+            pretrained_model.fc.add_module(name="4", module=new_linear_2)
+            pretrained_model.fc.add_module(name="5", module=nn.Softmax(dim=1))
 
         final_model = pretrained_model
 
