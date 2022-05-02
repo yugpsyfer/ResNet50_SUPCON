@@ -1,3 +1,7 @@
+"""TO DO
+ADD get item for tensor loss in SUPCON METRIC
+
+"""
 import torch
 from sklearn.metrics import accuracy_score
 import torch.nn.functional as F
@@ -29,7 +33,8 @@ def metric(y_true, y_pred, embeddings, criterion):
         predicted = predicted.numpy().flatten()
         labels = y_true.cpu()
         labels = labels.numpy().flatten()
-        accuracy_score(y_true=labels, y_pred=predicted)
+
+        return accuracy_score(y_true=labels, y_pred=predicted)
 
     elif criterion[0] == "SupCon":
         return F.cosine_similarity(embeddings, y_pred)
