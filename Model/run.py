@@ -64,23 +64,22 @@ def pre_training(opt, config):
 
     if opt.loss_criterion == "SupCon":
         model = mm.model
-        epochs = config.epochs
-        optimizer = optim.SGD(lr=config.learning_rate,
+        optimizer = optim.SGD(lr=config["learning_rate"],
                               params=model.parameters(),
-                              momentum=config.momentum,
-                              weight_decay=config.L2_decay,
-                              nesterov=config.use_nestrov)
+                              momentum=config["momentum"],
+                              weight_decay=config["L2_decay"],
+                              nesterov=config["use_nestrov"])
 
         criterion = ["SupCon", SupConLoss(temperature=config.temperature, contrast_mode='all',
                                           base_temperature=config.temperature, device=dev), 0]
 
     elif opt.loss_criterion == "CE":
         model = mm.model
-        optimizer = optim.SGD(lr=config.learning_rate,
+        optimizer = optim.SGD(lr=config["learning_rate"],
                               params=model.parameters(),
-                              momentum=config.momentum,
-                              weight_decay=config.L2_decay,
-                              nesterov=config.use_nestrov)
+                              momentum=config["momentum"],
+                              weight_decay=config["L2_decay"],
+                              nesterov=config["use_nestrov"])
 
         criterion = ["CE", F.cross_entropy, 0]
     else:
@@ -94,7 +93,7 @@ def pre_training(opt, config):
     start_time = time()
 
     pretrained_model = train(train_dl=train_dl, val_dl=val_dl, criterion=criterion,
-                             optimizer=optimizer, dev=dev, model=model, config=config)
+                             optimizer=optimizer, device=dev, model=model, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
@@ -112,9 +111,9 @@ def linear_phase_training(opt, config):
     criterion = ["CE", F.cross_entropy, 1]  #FINAL TRAINING WITH CE AS LOSS
 
     optimizer = optim.Adam(params=model.parameters(),
-                           lr=config.learning_rate,
+                           lr=config["learning_rate"],
                            amsgrad=opt.use_amsgrad,
-                           weight_decay=config.L2_decay)
+                           weight_decay=config["L2_decay"])
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
     model.double()
@@ -124,7 +123,7 @@ def linear_phase_training(opt, config):
     start_time = time()
 
     trained_model = train(train_dl=train_dl, val_dl=val_dl, optimizer=optimizer,
-                          dev=dev, model=model, criterion=criterion, config=config)
+                          device=dev, model=model, criterion=criterion, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)

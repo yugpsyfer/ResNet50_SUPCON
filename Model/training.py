@@ -80,14 +80,14 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
     wandb.run.name = config['criterion'] + str(int(time()))
 
     scheduler = Scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
-                                                      T_0=config.initial_step_iters,
-                                                      T_mult=config.T_mult,
+                                                      T_0=config["initial_step_iters"],
+                                                      T_mult=config["T_mult"],
                                                       last_epoch=-1,
-                                                      eta_min=config.min_lr)
+                                                      eta_min=config["min_lr"])
 
     model.train()
 
-    for epoch in range(config.epochs):
+    for epoch in range(config["epochs"]):
 
         for batch in train_dl:
             optimizer.zero_grad()
@@ -120,9 +120,9 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
         l_train, metric_train = validate(train_dl, model, device, criterion)
 
         wandb.log({"Validation Loss": l_val,
-                   "Validation " + config.metric: metric_val*100,
+                   "Validation " + config["metric"]: metric_val*100,
                    "Training Loss": l_train,
-                   "Training " + config.metric: metric_train*100})
+                   "Training " + config["metric"]: metric_train*100})
 
         scheduler.step()
     return model
