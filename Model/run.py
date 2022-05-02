@@ -1,3 +1,10 @@
+"""TO DO
+1] Reimplement inference function"""
+
+"""
+------------------------IMPLEMENTED BY YUGANSH SINGH----------------------------------
+"""
+
 import os.path
 import torch
 import torch.nn.functional as F
@@ -10,7 +17,7 @@ from torch import optim
 import logging
 from time import time
 from .model import ResNet
-import importlib
+
 
 source_dataset_path = "./Inputs/mini_image_net_merged/"
 target_dataset_path = "./Output/Target/imagenet_v2/"
@@ -51,27 +58,30 @@ def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
     return train_, val_
 
 
-def pre_training(opt, config, criterion_options):
+def pre_training(opt, config):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion)
 
     if opt.loss_criterion == "SupCon":
         model = mm.model
-        temperature = criterion_options['SupCon']['temperature']
-        base_temperature = temperature
-        l_r = criterion_options['SupCon']['learning_rate']
-        optimr = importlib.import_module("torch.optim." + criterion_options['SupCon']['optimizer'])
-        optimizer = optimr.SGD(lr=l_r, params=model.parameters())
-        epochs = criterion_options['SupCon']['epochs']
-        criterion = ["SupCon", SupConLoss(temperature=temperature, contrast_mode='all',
-                                          base_temperature=base_temperature, device=dev), 0]
+        epochs = config.epochs
+        optimizer = optim.SGD(lr=config.learning_rate,
+                              params=model.parameters(),
+                              momentum=config.momentum,
+                              weight_decay=config.L2_decay,
+                              nesterov=config.use_nestrov)
+
+        criterion = ["SupCon", SupConLoss(temperature=config.temperature, contrast_mode='all',
+                                          base_temperature=config.temperature, device=dev), 0]
 
     elif opt.loss_criterion == "CE":
         model = mm.model
-        epochs = criterion_options['CE']['epochs']
-        l_r = criterion_options['CE']['learning_rate']
-        optimr = importlib.import_module("torch.optim." + criterion_options['CE']['optimizer'])
-        optimizer = optimr.SGD(lr=l_r, params=model.parameters())
+        optimizer = optim.SGD(lr=config.learning_rate,
+                              params=model.parameters(),
+                              momentum=config.momentum,
+                              weight_decay=config.L2_decay,
+                              nesterov=config.use_nestrov)
+
         criterion = ["CE", F.cross_entropy, 0]
     else:
         raise NameError("Loss not supported")
@@ -79,58 +89,52 @@ def pre_training(opt, config, criterion_options):
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, opt.loss_criterion, source_dataset_path)
     model.double()
     model.to(dev)
-    logging.info("STARTING PRETRAINING")
+
     print("STARTING PRETRAINING")
     start_time = time()
 
-    pretrained_model = train(train_dl=train_dl, val_dl=val_dl, criterion=criterion, epochs=epochs,
+    pretrained_model = train(train_dl=train_dl, val_dl=val_dl, criterion=criterion,
                              optimizer=optimizer, dev=dev, model=model, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
-    logging.info("TIME REQUIRED TO PRETRAIN THE MODEL:" + str(hours) + " hrs")
+    print("TIME REQUIRED TO PRETRAIN THE MODEL:" + str(hours) + " hrs")
 
     model_save_path = os.path.join(output_model_path, "pretrained_"+opt.loss_criterion + str(int(start_time)) + ".pt")
     save_model(model_save_path, pretrained_model)
 
 
-def linear_phase_training(opt, config, criterion_options):
+def linear_phase_training(opt, config):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=opt.loss_criterion, model_name=opt.model_name)
     model = mm.model
-    criterion = ["CE", F.cross_entropy, 1]
-    if opt.loss_criterion == "SupCon":
-        epochs = criterion_options['SupCon']['epochs']
-    else:
-        epochs = criterion_options['CE']['epochs']
 
-    l_r = 0.0004
-    config['learning_rate'] = 0.0004
-    config['optimizer'] = "adam"
-    criterion_options['CE']["optimizer"] = "adam"
-    criterion_options['CE']["learning_rate"] = 0.0004
+    criterion = ["CE", F.cross_entropy, 1]  #FINAL TRAINING WITH CE AS LOSS
 
-    optimizer = optim.Adam(params=model.parameters(), lr=l_r)
+    optimizer = optim.Adam(params=model.parameters(),
+                           lr=config.learning_rate,
+                           amsgrad=opt.use_amsgrad,
+                           weight_decay=config.L2_decay)
 
     train_dl, val_dl = prepare_dataloader(MiniImageNet, opt.batch_size, "CE", source_dataset_path)
     model.double()
     model.to(dev)
 
-    print("STARTING Training==================")
-    logging.info("STARTING TRAINING==================")
+    print("Starting Training")
     start_time = time()
 
-    trained_model = train(train_dl=train_dl, val_dl=val_dl, epochs=epochs, optimizer=optimizer,
+    trained_model = train(train_dl=train_dl, val_dl=val_dl, optimizer=optimizer,
                           dev=dev, model=model, criterion=criterion, config=config)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
 
-    logging.info("TIME REQUIRED TO TRAIN THE MODEL:" + str(hours) + " hrs")
+    print("TIME REQUIRED TO TRAIN THE MODEL:" + str(hours) + " hrs")
 
     model_save_path = os.path.join(output_model_path, "trained_"+opt.loss_criterion + ".pt")
     save_model(model_save_path, trained_model)
 
+"""BELOW CODE IS NOT WORKING WILL HAVE TO RECODE THIS"""
 
 def inference(opt):
     dev = get_cuda_device()

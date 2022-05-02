@@ -1,10 +1,12 @@
 import torch
 from sklearn.metrics import accuracy_score
+import torch.nn.functional as F
 import wandb
 from time import time
+import torch.optim.lr_scheduler as Scheduler
 
 
-def calculate_loss(criterion, labels_true, out, embeddings_=None):
+def calculate_loss(criterion, labels_true, out, embeddings_):
     loss_name = criterion[0]
     loss_func = criterion[1]
 
@@ -19,10 +21,24 @@ def calculate_loss(criterion, labels_true, out, embeddings_=None):
     return loss
 
 
+def metric(y_true, y_pred, embeddings, criterion):
+
+    if criterion[0] == "CE":
+
+        predicted = torch.argmax(y_pred, dim=1).cpu()
+        predicted = predicted.numpy().flatten()
+        labels = y_true.cpu()
+        labels = labels.numpy().flatten()
+        accuracy_score(y_true=labels, y_pred=predicted)
+
+    elif criterion[0] == "SupCon":
+        return F.cosine_similarity(embeddings, y_pred)
+
+
 @torch.no_grad()
-def validate(val_dl, model, dev, criterion):
+def validate(val_dl, model, device, criterion):
     net_loss = 0
-    net_accuracy = 0
+    net_metric_ = 0
     count = 0
 
     for batch in val_dl:
@@ -33,46 +49,45 @@ def validate(val_dl, model, dev, criterion):
             embeddings = embeddings.type(torch.DoubleTensor)
             images = torch.cat([images[0], images[1]], dim=0)
             images = images.type(torch.DoubleTensor)
-            embeddings = embeddings.to(dev)
+            embeddings = embeddings.to(device)
 
         elif criterion[0] == "CE":
             embeddings = None
             images, labels = batch
             images = images.type(torch.DoubleTensor)
 
-        images = images.to(dev)
+        images = images.to(device)
         labels = labels.type(torch.LongTensor)
-        labels = labels.to(dev)
+        labels = labels.to(device)
 
         out = model(images)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
+        metric_ = metric(labels, out, embeddings, criterion)
 
-        # if criterion[2] == 1:
-        predicted = torch.argmax(out, dim=1).cpu()
-        predicted = predicted.numpy().flatten()
-        labels = labels.cpu()
-        labels = labels.numpy().flatten()
-        acc = accuracy_score(y_true=labels, y_pred=predicted)
-        net_accuracy += acc
+        net_metric_ += metric_
 
-        loss = torch.nan_to_num(loss)
+        # loss = torch.nan_to_num(loss)
         net_loss += loss.item()
 
         count += 1
 
-    return net_loss / count, net_accuracy / count
+    return net_loss / count, net_metric_ / count
 
 
-def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
+def train(train_dl, val_dl, optimizer, model, device, criterion, config):
 
     wandb.watch(model, log_freq=10)
     wandb.run.name = config['criterion'] + str(int(time()))
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=0, last_epoch=-1,
-    #                                                        verbose=False)
+
+    scheduler = Scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
+                                                      T_0=config.initial_step_iters,
+                                                      T_mult=config.T_mult,
+                                                      last_epoch=-1,
+                                                      eta_min=config.min_lr)
+
     model.train()
-    history = dict()
-    history['train'] = []
-    for epoch in range(epochs):
+
+    for epoch in range(config.epochs):
 
         for batch in train_dl:
             optimizer.zero_grad()
@@ -83,7 +98,7 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
                 embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
                 images = images.type(torch.DoubleTensor)
-                embeddings = embeddings.to(dev)
+                embeddings = embeddings.to(device)
 
             elif criterion[0] == "CE":
                 embeddings = None
@@ -92,27 +107,28 @@ def train(train_dl, val_dl, epochs, optimizer, model, dev, criterion, config):
             else:
                 raise ValueError("ERROR LOSS FUNCTION")
 
-            images = images.to(dev)
+            images = images.to(device)
             labels = labels.type(torch.LongTensor)
-            labels = labels.to(dev)
+            labels = labels.to(device)
 
             out = model(images)
             loss = calculate_loss(criterion, labels, out, embeddings)
             loss.backward()
             optimizer.step()
 
-        if epoch % 1 == 0:
-            l_val, acc_val = validate(val_dl, model, dev, criterion)
-            l_train, acc_train = validate(train_dl, model, dev, criterion)
-            # if criterion[] == 0:
-            #     wandb.log({"Average_Loss": l_val*100})
-            # else:
-            wandb.log({"Validation Loss": l_val,
-                       "Validation Accuracy": acc_val*100,
-                       "Training Loss": l_train,
-                       "Training Accuracy": acc_train*100})
-        # scheduler.step()
+        l_val, metric_val = validate(val_dl, model, device, criterion)
+        l_train, metric_train = validate(train_dl, model, device, criterion)
+
+        wandb.log({"Validation Loss": l_val,
+                   "Validation " + config.metric: metric_val*100,
+                   "Training Loss": l_train,
+                   "Training " + config.metric: metric_train*100})
+
+        scheduler.step()
     return model
+
+
+"""NOT WORKING HAS TO BE REIMPLEMENTED"""
 
 
 @torch.no_grad()
