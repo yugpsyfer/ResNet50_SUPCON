@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_name', type=str, help="Choose the model to evaluate")
     parser.add_argument('--learning_rate', type=float, help="Choose learning rate", default=0.3)
     parser.add_argument('--optimizer', type=str, help="Choose optimizer", default="sgd")
-    parser.add_argument('--epochs', type=str, help="Number of epochs to iterate through", default=150)
+    parser.add_argument('--epochs', type=int, help="Number of epochs to iterate through", default=150)
     parser.add_argument('--momentum', type=float, help="Fraction of momentum", default=0.9)
     parser.add_argument('--L2_decay', type=float, help="Multiplier for L2", default=1e-04)
     parser.add_argument('--use_nestrov', type=bool, help="Whether to use Nestrov", default=True)
