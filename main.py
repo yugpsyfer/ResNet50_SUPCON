@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_nestrov', type=bool, help="Whether to use Nestrov", default=True)
     parser.add_argument('--dataset_name', type=str, help="Name of the dataset you will be using", default="Mini-ImageNet")
     parser.add_argument('--use_amsgrad', type=bool, help="Whether to use AMS-GRAD variant", default=True)
-    parser.add_argument('-min_lr', type=float, help="Minimum learning rate for cosine annealing", default=0.0)
+    parser.add_argument('--min_lr', type=float, help="Minimum learning rate for cosine annealing", default=0.0)
     parser.add_argument('--initial_step_iters', type=int, help="Initial step iterations", default=25)
     parser.add_argument('--T_mult', type=int, help="Multiplier for Cosine annealing with warm restarts", default=1)
 
