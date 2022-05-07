@@ -84,11 +84,9 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
     wandb.watch(model, log_freq=10)
     wandb.run.name = config['criterion'] + str(int(time()))
 
-    # scheduler = Scheduler.CosineAnnealingWarmRestarts(optimizer=optimizer,
-    #                                                   T_0=config["initial_step_iters"],
-    #                                                   T_mult=config["T_mult"],
-    #                                                   last_epoch=-1,
-    #                                                   eta_min=config["min_lr"])
+    scheduler = Scheduler.CosineAnnealingLR(optimizer=optimizer,
+                                            T_max=config["epochs"],
+                                            eta_min=config["min_lr"])
 
     model.train()
 
@@ -129,7 +127,7 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
                    "Training Loss": l_train,
                    "Training " + config["metric"]: metric_train*100})
 
-        # scheduler.step()
+        scheduler.step()
     return model
 
 
