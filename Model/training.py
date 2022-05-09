@@ -66,6 +66,7 @@ def validate(val_dl, model, device, criterion):
         labels = labels.to(device)
 
         out = model(images)
+        out = F.normalize(out, dim=-1)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
         metric_ = metric(labels, out, embeddings, criterion)
 
@@ -115,6 +116,7 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
             labels = labels.to(device)
 
             out = model(images)
+            out = F.normalize(out, dim=-1)
             loss = calculate_loss(criterion, labels, out, embeddings)
             loss.backward()
             optimizer.step()
