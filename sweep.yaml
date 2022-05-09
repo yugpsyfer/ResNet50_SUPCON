@@ -1,9 +1,11 @@
 program: main.py
 method: grid
 parameters:
+  epochs:
+    values: [100]
   learning_rate:
-    values: [0.1, 0.2, 0.5, 0.8]
+    values: [0.1, 0.2, 0.5]
   L2_decay:
-    values: [1e-3, 1e-5, 1e-6]
+    values: [0]
   T_mult:
-    values: [2,3,4]
+    values: [1,2,3]
