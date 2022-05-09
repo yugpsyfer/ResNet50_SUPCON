@@ -13,7 +13,7 @@ if __name__ == '__main__':
                         choices=[0, 1, 2])
     parser.add_argument('--batch_size', type=int, default=1024, help="Choose batch size for training")
     parser.add_argument('--model_name', type=str, help="Choose the model to evaluate")
-    parser.add_argument('--learning_rate', type=float, help="Choose learning rate", default=0.3)
+    parser.add_argument('--learning_rate', type=float, help="Choose learning rate", default=0.5)
     parser.add_argument('--optimizer', type=str, help="Choose optimizer", default="sgd")
     parser.add_argument('--epochs', type=int, help="Number of epochs to iterate through", default=100)
     parser.add_argument('--momentum', type=float, help="Fraction of momentum", default=0.9)
