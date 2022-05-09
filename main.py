@@ -6,7 +6,7 @@ import wandb
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Process options for KG-NN')
-    parser.add_argument('--loss_criterion', type=str, default="CE",
+    parser.add_argument('--loss_criterion', type=str, default="SupCon",
                         choices=["SupCon", "CE"], help="Choose the loss criterion")
     parser.add_argument('--mode', type=int, default=0,
                         help="Choose if you want to 0 : pretrain, mode : Train, 2 : Test",
