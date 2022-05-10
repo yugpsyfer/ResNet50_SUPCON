@@ -17,6 +17,7 @@ def calculate_loss(criterion, labels_true, out, embeddings_):
     if loss_name == "CE":
         loss = loss_func(out, labels_true)
     elif loss_name == "SupCon":
+        out = F.normalize(out, dim=-1)
         bsz = labels_true.shape[0]
         f1, f2 = torch.split(out, [bsz, bsz], dim=0)
         out = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
@@ -69,7 +70,6 @@ def validate(val_dl, model, device, criterion):
         labels = labels.to(device)
 
         out = model(images)
-        out = F.normalize(out, dim=-1)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
         metric_ = metric(labels, out, embeddings, criterion)
 
@@ -119,7 +119,6 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
             labels = labels.to(device)
 
             out = model(images)
-            out = F.normalize(out, dim=-1)
             loss = calculate_loss(criterion, labels, out, embeddings)
             loss.backward()
             optimizer.step()
