@@ -7,5 +7,4 @@ parameters:
     values: [0.1, 0.2, 0.5]
   L2_decay:
     values: [0]
-  T_mult:
-    values: [1,2,3]
+
