@@ -83,14 +83,15 @@ def validate(val_dl, model, device, criterion):
     return net_loss / count, net_metric_ / count
 
 
-def train(train_dl, val_dl, optimizer, model, device, criterion, config):
+def train(train_dl, val_dl, optimizer, model, device, criterion, config, annealing_):
 
     wandb.watch(model, log_freq=10)
     wandb.run.name = config['criterion'] + str(int(time()))
 
-    scheduler = Scheduler.CosineAnnealingLR(optimizer=optimizer,
-                                            T_max=config["epochs"],
-                                            eta_min=config["min_lr"])
+    if annealing_ == 0:
+        scheduler = Scheduler.CosineAnnealingLR(optimizer=optimizer,
+                                                T_max=config["epochs"],
+                                                eta_min=config["min_lr"])
 
     model.train()
 
@@ -131,7 +132,9 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config):
                    "Training Loss": l_train,
                    "Training " + config["metric"]: metric_train*100})
 
-        scheduler.step()
+        if annealing_ == 0:
+            scheduler.step()
+
     return model
 
 

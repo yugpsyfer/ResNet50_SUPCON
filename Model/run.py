@@ -129,7 +129,7 @@ def linear_phase_training(opt, config):
     start_time = time()
 
     trained_model = train(train_dl=train_dl, val_dl=val_dl, optimizer=optimizer,
-                          device=dev, model=model, criterion=criterion, config=config)
+                          device=dev, model=model, criterion=criterion, config=config, annealing_ = opt.mode)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
