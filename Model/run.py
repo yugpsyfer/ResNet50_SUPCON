@@ -110,6 +110,11 @@ def linear_phase_training(opt, config):
 
     criterion = ["CE", F.cross_entropy, 1]  #FINAL TRAINING WITH CE AS LOSS
 
+    if "SupCon" in opt.model_name:
+        model_name = "SupCon"
+    else:
+        model_name = "CE"
+
     optimizer = optim.Adam(params=model.parameters(),
                            lr=config["learning_rate"],
                            amsgrad=opt.use_amsgrad,
@@ -130,7 +135,7 @@ def linear_phase_training(opt, config):
 
     print("TIME REQUIRED TO TRAIN THE MODEL:" + str(hours) + " hrs")
 
-    model_save_path = os.path.join(output_model_path, "trained_"+opt.loss_criterion + ".pt")
+    model_save_path = os.path.join(output_model_path, "trained_" + model_name + ".pt")
     save_model(model_save_path, trained_model)
 
 """BELOW CODE IS NOT WORKING WILL HAVE TO RECODE THIS"""
