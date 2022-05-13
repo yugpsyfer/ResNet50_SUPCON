@@ -37,7 +37,7 @@ class ResNet:
     def _make_training_model(self):
         temp_ = self.model_name.split(".")[0]
         temp_ = temp_.split("_")[1]
-        if temp_ == "SupCon":
+        if "SupCon" in temp_:
             pretrained_model = self._load_pretrained_model()
             for param in pretrained_model.parameters():
                 param.requires_grad = False
