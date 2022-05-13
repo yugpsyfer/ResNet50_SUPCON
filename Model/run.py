@@ -114,6 +114,7 @@ def linear_phase_training(opt, config):
         model_name = "SupCon"
     else:
         model_name = "CE"
+    print("TRAINING STARTED FOR " + model_name)
 
     optimizer = optim.Adam(params=model.parameters(),
                            lr=config["learning_rate"],
