@@ -70,8 +70,7 @@ def pre_training(opt, config):
                               weight_decay=config["L2_decay"],
                               nesterov=config["use_nestrov"])
 
-        criterion = ["SupCon", SupConLoss(temperature=config["temperature"], contrast_mode='all',
-                                          base_temperature=config["temperature"], device=dev), 0]
+        criterion = ["SupCon", SupConLoss(temperature=config["temperature"], device=dev), 0]
 
     elif opt.loss_criterion == "CE":
         model = mm.model

@@ -21,7 +21,7 @@ def calculate_loss(criterion, labels_true, out, embeddings_):
         bsz = labels_true.shape[0]
         f1, f2 = torch.split(out, [bsz, bsz], dim=0)
         out = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
-        loss = loss_func(features=out, embeddings=embeddings_, labels=labels_true)
+        loss = loss_func(features=out, embeddings=embeddings_)
 
     return loss
 
