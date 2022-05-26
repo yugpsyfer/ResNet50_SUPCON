@@ -49,7 +49,7 @@ def get_cuda_device():
 def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
     dataset = dataset_class(root_dir=ds_path, label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
     val_size = int(len(dataset) * 0.1)
-    train_size = len(dataset)   # - int(len(dataset) * 0.1)
+    train_size = len(dataset) - int(len(dataset) * 0.1)
 
     _, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
     train_ = DataLoader(dataset, batch_size=batch_size, shuffle=True)
