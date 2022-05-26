@@ -50,21 +50,22 @@ def validate(val_dl, model, device, criterion):
     for batch in val_dl:
 
         if criterion[0] == "SupCon":
-            images, labels, embeddings = batch
+            images, embeddings = batch
             embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
             embeddings = embeddings.type(torch.DoubleTensor)
             images = torch.cat([images[0], images[1]], dim=0)
             images = images.type(torch.DoubleTensor)
             embeddings = embeddings.to(device)
+            labels = None
 
         elif criterion[0] == "CE":
             embeddings = None
             images, labels = batch
             images = images.type(torch.DoubleTensor)
+            labels = labels.type(torch.LongTensor)
+            labels = labels.to(device)
 
         images = images.to(device)
-        labels = labels.type(torch.LongTensor)
-        labels = labels.to(device)
 
         out = model(images)
         loss = calculate_loss(criterion, labels, out, embeddings_=embeddings)
@@ -98,23 +99,24 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config, anneali
             optimizer.zero_grad()
 
             if criterion[0] == "SupCon":
-                images, labels, embeddings = batch
+                images, embeddings = batch
                 embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
                 embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
                 images = images.type(torch.DoubleTensor)
                 embeddings = embeddings.to(device)
+                labels = None
 
             elif criterion[0] == "CE":
                 embeddings = None
                 images, labels = batch
                 images = images.type(torch.DoubleTensor)
+                labels = labels.type(torch.LongTensor)
+                labels = labels.to(device)
             else:
                 raise ValueError("ERROR LOSS FUNCTION")
 
             images = images.to(device)
-            labels = labels.type(torch.LongTensor)
-            labels = labels.to(device)
 
             out = model(images)
             loss = calculate_loss(criterion, labels, out, embeddings)
