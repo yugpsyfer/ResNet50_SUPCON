@@ -1,3 +1,7 @@
+"""
+ENTIRE CODE IS USELESS WILL CHANGE IN FUTURE
+"""
+
 from rdflib import Graph, term, Literal
 from rdflib.namespace import XSD
 import pandas as pd

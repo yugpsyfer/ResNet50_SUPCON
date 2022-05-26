@@ -45,7 +45,7 @@ class MiniImageNet(Dataset):
             self.tensorTransformation = TwoCropTransform(train_transform)
             embedding_path = "./Outputs/Knowledge_Graphs/embeddings.npy"
             self.embeddings = np.load(embedding_path, allow_pickle=True)
-            self.embeddings = self.embeddings[()]
+            # self.embeddings = self.embeddings[()]
 
             labels = pd.read_csv(label_file, delimiter=" ")
             labels = enumerate(labels['wdnet_id'].to_list())
@@ -78,10 +78,10 @@ class MiniImageNet(Dataset):
         files = self.allFiles[index]
         file_name = files.split("_")[0]
         label = torch.tensor(data=self.label_dict[file_name])
-        _embedding_ = torch.tensor(data=self.embeddings[file_name].flatten(), dtype=torch.double)
+        _embedding_ = torch.tensor(data=self.embeddings[int(label.data), :].flatten(), dtype=torch.double)
         embedding = [_embedding_, _embedding_]
         with Image.open(self.rootDir + files) as im:
             data = self.tensorTransformation(im)
 
-        return (data, label, embedding)  # Return a tuple format (data,label)
+        return data, embedding  # Return a tuple format (data,label)
 

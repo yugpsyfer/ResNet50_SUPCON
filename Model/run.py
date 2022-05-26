@@ -49,10 +49,10 @@ def get_cuda_device():
 def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
     dataset = dataset_class(root_dir=ds_path, label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
     val_size = int(len(dataset) * 0.1)
-    train_size = len(dataset) - int(len(dataset) * 0.1)
+    train_size = len(dataset)   # - int(len(dataset) * 0.1)
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
-    train_ = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    _, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
+    train_ = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     val_ = DataLoader(val_set, batch_size=batch_size, shuffle=True)
 
     return train_, val_
@@ -92,7 +92,7 @@ def pre_training(opt, config):
     start_time = time()
 
     pretrained_model = train(train_dl=train_dl, val_dl=val_dl, criterion=criterion,
-                             optimizer=optimizer, device=dev, model=model, config=config)
+                             optimizer=optimizer, device=dev, model=model, config=config, annealing_=opt.mode)
     end_time = time()
     seconds_elapsed = end_time - start_time
     hours, rest = divmod(seconds_elapsed, 3600)
