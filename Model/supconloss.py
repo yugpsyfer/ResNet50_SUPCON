@@ -42,7 +42,7 @@ class SupConLoss(nn.Module):
 
         F_ = features.expand(features.shape[0], -1, -1)
 
-        all_dot = torch.bmm(embeddings, F_.permute(0,2,1))
+        all_dot = torch.bmm(embeddings, F_.permute(0, 2, 1))
         all_dot = torch.squeeze(all_dot)
 
         negatives = all_dot * mask
