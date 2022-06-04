@@ -16,18 +16,19 @@ class SupConLoss(nn.Module):
 
     def forward(self, features, embeddings):
         embeddings = torch.unsqueeze(embeddings, dim=1)
-        features = features.view(-1, 300)
+        features = features.permute(0, 1)
 
         mask_embeddings = torch.squeeze(embeddings)
         mask = torch.matmul(mask_embeddings, mask_embeddings.permute(1, 0))
+        
         mask = mask.to(dtype=torch.float32)
+        mask = torch.clamp(mask, min=-1, max=1)
 
         diag = torch.eye(n=mask.shape[0],
                          m=mask.shape[1],
                          dtype=torch.float32,
-                         device=self.device)
+                         device=self.device) * torch.max(mask)
 
-        mask = torch.sub(mask, diag)     # Removed the diagonal elements
         mask[mask == 1] = 0     # Removed all the positives
 
         mask[mask != 0] = 1     # Make a mask for only negatives
