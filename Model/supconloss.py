@@ -20,14 +20,13 @@ class SupConLoss(nn.Module):
 
         mask_embeddings = torch.squeeze(embeddings)
         mask = torch.matmul(mask_embeddings, mask_embeddings.permute(1, 0))
-        
-        mask = mask.to(dtype=torch.float32)
         mask = torch.clamp(mask, min=-1, max=1)
 
         diag = torch.eye(n=mask.shape[0],
                          m=mask.shape[1],
-                         dtype=torch.float32,
-                         device=self.device) * torch.max(mask)
+                         device=self.device)
+
+        mask = mask - diag      # Remove all diagonal elements
 
         mask[mask == 1] = 0     # Removed all the positives
 
@@ -64,6 +63,6 @@ class SupConLoss(nn.Module):
 
         loss = torch.sum(logits, dim=0)
 
-        loss = loss / features.shape[0]  # Average on the entire batch
+        # loss = loss / features.shape[0]
 
         return loss
