@@ -14,43 +14,32 @@ class SupConLoss(nn.Module):
         self.temperature = temperature
         self.device = device
 
-    def forward(self, features, embeddings):
+    def forward(self, features, embeddings, labels):
         embeddings = torch.unsqueeze(embeddings, dim=1)
         features = features.permute(0, 1)
 
-        mask_embeddings = torch.squeeze(embeddings)
-        mask = torch.matmul(mask_embeddings, mask_embeddings.permute(1, 0))
-        mask = torch.clamp(mask, min=-1, max=1)
+        label_tile = torch.tile(labels.view(1, -1), dims=(labels.shape[0], 1))
+        positive_label_mask = torch.eq(label_tile, label_tile.T)
 
-        diag = torch.eye(n=mask.shape[0],
-                         m=mask.shape[1],
-                         device=self.device)
+        negative_label_mask = (~positive_label_mask).to(torch.int32)
+        positive_label_mask = positive_label_mask.to(torch.int32) - torch.eye(n=labels.shape[0], m=labels.shape[0])
 
-        mask = mask - diag      # Remove all diagonal elements
+        # positives = positive_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
+        # negatives = negative_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
 
-        mask[mask == 1] = 0     # Removed all the positives
-
-        mask[mask != 0] = 1     # Make a mask for only negatives
-
-        positive_mask = torch.ones(size=mask.shape,
-                                   dtype=torch.float32,
-                                   device=self.device)
-
-        positive_mask = positive_mask - mask - diag
-
-        positive_count = torch.sum(positive_mask, dim=0)
+        positive_count = torch.sum(positive_label_mask, dim=0)
 
         F_ = features.expand(features.shape[0], -1, -1)
 
-        all_dot = torch.bmm(embeddings, F_.permute(0, 2, 1))
+        all_dot = torch.matmul(embeddings, F_.permute(0, 2, 1))
         all_dot = torch.squeeze(all_dot)
 
-        negatives = all_dot * mask
+        negatives = all_dot * negative_label_mask
         negatives = negatives / self.temperature
         negatives = torch.exp(negatives)
         negatives = torch.sum(negatives, dim=1)
 
-        positives = all_dot * positive_mask
+        positives = all_dot * positive_label_mask
         positives = positives / self.temperature
         positives = torch.exp(positives)
 
@@ -63,6 +52,6 @@ class SupConLoss(nn.Module):
 
         loss = torch.sum(logits, dim=0)
 
-        # loss = loss / features.shape[0]
+        loss = loss / features.shape[0]
 
         return loss

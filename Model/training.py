@@ -18,7 +18,8 @@ def calculate_loss(criterion, labels_true, out, embeddings_):
         loss = loss_func(out, labels_true)
     elif loss_name == "SupCon":
         out = F.normalize(out, dim=-1)
-        loss = loss_func(features=out, embeddings=embeddings_)
+        loss = loss_func(features=out, embeddings=embeddings_,
+                         labels=labels_true)
 
     return loss
 
@@ -51,13 +52,13 @@ def validate(val_dl, model, device, criterion):
     for batch in val_dl:
 
         if criterion[0] == "SupCon":
-            images, embeddings = batch
+            images, embeddings, labels = batch
             embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
             embeddings = embeddings.type(torch.DoubleTensor)
             images = torch.cat([images[0], images[1]], dim=0)
             images = images.type(torch.DoubleTensor)
             embeddings = embeddings.to(device)
-            labels = None
+            labels = labels.to(device)
 
         elif criterion[0] == "CE":
             embeddings = None
@@ -100,13 +101,13 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config, anneali
             optimizer.zero_grad()
 
             if criterion[0] == "SupCon":
-                images, embeddings = batch
+                images, embeddings, labels = batch
                 embeddings = torch.cat([embeddings[0], embeddings[1]], dim=0)
                 embeddings = embeddings.type(torch.DoubleTensor)
                 images = torch.cat([images[0], images[1]], dim=0)
                 images = images.type(torch.DoubleTensor)
                 embeddings = embeddings.to(device)
-                labels = None
+                labels = labels.to(device)
 
             elif criterion[0] == "CE":
                 embeddings = None

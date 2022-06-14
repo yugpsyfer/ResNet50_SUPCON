@@ -83,5 +83,5 @@ class MiniImageNet(Dataset):
         with Image.open(self.rootDir + files) as im:
             data = self.tensorTransformation(im)
 
-        return data, embedding  # Return a tuple format (data,label)
+        return data, embedding, label  # Return a tuple format (data,label)
 
