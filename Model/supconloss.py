@@ -18,11 +18,18 @@ class SupConLoss(nn.Module):
         embeddings = torch.unsqueeze(embeddings, dim=1)
         features = features.permute(0, 1)
 
+        labels = torch.unsqueeze(labels, dim=1)
+        labels = torch.tile(labels, dims=(1,2))
+        labels = labels.view(-1, 1)
+        label = torch.squeeze(labels)
+
         label_tile = torch.tile(labels.view(1, -1), dims=(labels.shape[0], 1))
         positive_label_mask = torch.eq(label_tile, label_tile.T)
 
-        negative_label_mask = (~positive_label_mask).to(torch.int32)
-        positive_label_mask = positive_label_mask.to(torch.int32) - torch.eye(n=labels.shape[0], m=labels.shape[0])
+        negative_label_mask = (~positive_label_mask).to(device=self.device, dtype=torch.int32)
+        positive_label_mask = positive_label_mask.to(device=self.device, dtype=torch.int32) - torch.eye(n=labels.shape[0],
+                                                                                                        m=labels.shape[0],
+                                                                                                        device=self.device)
 
         # positives = positive_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
         # negatives = negative_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
