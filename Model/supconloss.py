@@ -15,8 +15,6 @@ class SupConLoss(nn.Module):
         self.device = device
 
     def forward(self, features, embeddings, labels):
-        embeddings = torch.unsqueeze(embeddings, dim=1)
-        features = features.permute(0, 1)
 
         labels = torch.unsqueeze(labels, dim=1)
         labels = torch.tile(labels, dims=(1,2))
@@ -31,34 +29,28 @@ class SupConLoss(nn.Module):
                                                                                                         m=labels.shape[0],
                                                                                                         device=self.device)
 
-        # positives = positive_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
-        # negatives = negative_label_mask * torch.broadcast_to(embeddings,  size=(embeddings.shape[0], embeddings.shape[0]))
-
         positive_count = torch.sum(positive_label_mask, dim=0)
 
-        F_ = features.expand(features.shape[0], -1, -1)
+        all_dot = torch.matmul(embeddings, features.permute(1,0))
 
-        all_dot = torch.matmul(embeddings, F_.permute(0, 2, 1))
-        all_dot = torch.squeeze(all_dot)
-
-        negatives = all_dot * negative_label_mask
+        negatives = all_dot
         negatives = negatives / self.temperature
-        negatives = torch.exp(negatives)
+        negatives = torch.exp(negatives) * negative_label_mask
         negatives = torch.sum(negatives, dim=1)
 
-        positives = all_dot * positive_label_mask
+        positives = all_dot
         positives = positives / self.temperature
-        positives = torch.exp(positives)
-
+        positives = torch.exp(positives) * positive_label_mask
         _log_ = torch.div(positives, negatives)
+        _log_[_log_ == 0] = 1
         _log_ = torch.log(_log_)
 
         logits = torch.sum(_log_, dim=1)
         logits = torch.div(logits, positive_count)
         logits = logits * (-1)
 
-        loss = torch.sum(logits, dim=0)
+        loss = logits.mean()
 
-        loss = loss / features.shape[0]
+        # loss = loss / features.shape[0]
 
         return loss
