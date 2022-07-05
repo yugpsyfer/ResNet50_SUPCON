@@ -19,7 +19,7 @@ from time import time
 from .model import ResNet
 
 
-source_dataset_path = "./Inputs/mini_image_net_merged/"
+source_dataset_path = "./Inputs/mini_imagenet_subset/"  #CHANGED
 target_dataset_path = "./Output/Target/imagenet_v2/"
 output_model_path = "Outputs/Models/"
 
@@ -47,7 +47,7 @@ def get_cuda_device():
 
 
 def prepare_dataloader(dataset_class, batch_size, crit, ds_path):
-    dataset = dataset_class(root_dir=ds_path, label_file="./Inputs/Labels/wordnet_details.txt", criterion=crit)
+    dataset = dataset_class(root_dir=ds_path, label_file="./Inputs/Labels/subset_mini_imagenet.txt", criterion=crit)        #CHANGED
     val_size = int(len(dataset) * 0.1)
     train_size = len(dataset) - int(len(dataset) * 0.1)
 
