@@ -1,6 +1,7 @@
 program: main.py
 method: grid
 parameters:
+  loss_criterion: ['SupCon']
   epochs:
     values: [100]
   learning_rate:
