@@ -31,25 +31,21 @@ class SupConLoss(nn.Module):
 
         positive_count = torch.sum(positive_label_mask, dim=0)
 
-        all_dot = torch.matmul(embeddings, features.permute(1,0))
+        all_dot = torch.matmul(embeddings, features.permute(1, 0)) / self.temperature
 
-        negatives = all_dot
-        negatives = negatives / self.temperature
-        negatives = torch.exp(negatives) * negative_label_mask
-        negatives = torch.sum(negatives, dim=1)
+        negatives = torch.exp(all_dot) * negative_label_mask
+        negatives = torch.log(torch.sum(negatives, dim=1))
 
-        positives = all_dot
-        positives = positives / self.temperature
-        positives = torch.exp(positives) * positive_label_mask
-        _log_ = torch.div(positives, negatives)
-        _log_[_log_ == 0] = 1
-        _log_ = torch.log(_log_)
+        # positives = all_dot
+        _log_ = all_dot - negatives
+        # _log_[_log_ == 0] = 1
+        # _log_ = torch.log(_log_)
 
-        logits = torch.sum(_log_, dim=1)
+        logits = torch.sum(_log_ * positive_label_mask, dim=1)
         logits = torch.div(logits, positive_count)
         logits = logits * (-1)
 
-        loss = logits #.mean()
+        loss = torch.mean(logits) #.mean()
 
         # loss = loss / features.shape[0]
 
