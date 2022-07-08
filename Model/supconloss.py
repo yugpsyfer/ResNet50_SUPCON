@@ -17,9 +17,8 @@ class SupConLoss(nn.Module):
     def forward(self, features, embeddings, labels):
 
         labels = torch.unsqueeze(labels, dim=1)
-        labels = torch.tile(labels, dims=(1,2))
+        labels = torch.tile(labels, dims=(1, 2))
         labels = labels.view(-1, 1)
-        # label = torch.squeeze(labels)
 
         label_tile = torch.tile(labels.view(1, -1), dims=(labels.shape[0], 1))
         positive_label_mask = torch.eq(label_tile, label_tile.T)
@@ -28,18 +27,13 @@ class SupConLoss(nn.Module):
         positive_label_mask = positive_label_mask.to(device=self.device, dtype=torch.int32) - torch.eye(n=labels.shape[0],
                                                                                                         m=labels.shape[0],
                                                                                                         device=self.device)
-
         positive_count = torch.sum(positive_label_mask, dim=0)
 
         all_dot = torch.matmul(embeddings, features.permute(1, 0)) / self.temperature
 
         negatives = torch.exp(all_dot) * negative_label_mask
         negatives = torch.log(torch.sum(negatives, dim=1))
-
-        # positives = all_dot
         _log_ = all_dot - negatives
-        # _log_[_log_ == 0] = 1
-        # _log_ = torch.log(_log_)
 
         logits = torch.sum(_log_ * positive_label_mask, dim=1)
         logits = torch.div(logits, positive_count)

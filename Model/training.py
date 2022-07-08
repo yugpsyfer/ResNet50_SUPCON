@@ -39,7 +39,6 @@ def metric(y_true, y_pred, embeddings, criterion):
         y_pred = F.normalize(y_pred, dim=-1)
         _m = F.cosine_similarity(embeddings, y_pred)
         _m = torch.sum(_m, dim=0)/_m.shape[0]
-
         return _m
 
 
