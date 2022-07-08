@@ -129,9 +129,9 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config, anneali
         # print("TRAIN LOSS = ", l_train)
         # print("TRAIN Cosine sim = ", metric_train)
         wandb.log({"Validation Loss": l_val,
-                   "Validation " + config["metric"]: metric_val*100,
+                   "Validation " + config["metric"]: metric_val,
                    "Training Loss": l_train,
-                   "Training " + config["metric"]: metric_train*100})
+                   "Training " + config["metric"]: metric_train})
 
         if annealing_ == 0:
             scheduler.step()
