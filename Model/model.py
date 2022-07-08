@@ -41,19 +41,23 @@ class ResNet:
             pretrained_model = self._load_pretrained_model()
             for param in pretrained_model.parameters():
                 param.requires_grad = False
-            new_linear_1 = nn.Linear(in_features=300, out_features=1000, bias=True)
-            new_linear_2 = nn.Linear(in_features=1000, out_features=1000, bias=True)
-            new_linear_3 = nn.Linear(in_features=1000, out_features=100, bias=True)
+            new_linear_1 = nn.Linear(in_features=300, out_features=1024, bias=True)
+            new_linear_2 = nn.Linear(in_features=1024, out_features=512, bias=True)
+            new_linear_3 = nn.Linear(in_features=512, out_features=256, bias=True)
+            new_linear_4 = nn.Linear(in_features=256, out_features=100, bias=True)
             nn.init.xavier_uniform_(new_linear_1.weight)
             nn.init.xavier_uniform_(new_linear_2.weight)
             nn.init.xavier_uniform_(new_linear_3.weight)
+            nn.init.xavier_uniform_(new_linear_4.weight)
             pretrained_model.fc.add_module(name="1", module=nn.ReLU())
             pretrained_model.fc.add_module(name="2", module=new_linear_1)
             pretrained_model.fc.add_module(name="3", module=nn.ReLU())
             pretrained_model.fc.add_module(name="4", module=new_linear_2)
             pretrained_model.fc.add_module(name="5", module=nn.ReLU())
             pretrained_model.fc.add_module(name="6", module=new_linear_3)
-            pretrained_model.fc.add_module(name="7", module=nn.Softmax(dim=1))
+            pretrained_model.fc.add_module(name="7", module=nn.ReLU())
+            pretrained_model.fc.add_module(name="8", module=new_linear_4)
+            pretrained_model.fc.add_module(name="9", module=nn.Softmax(dim=1))
         else:
             pretrained_model = self._load_pretrained_model()
             for param in pretrained_model.parameters():
