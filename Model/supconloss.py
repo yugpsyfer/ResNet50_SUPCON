@@ -19,7 +19,7 @@ class SupConLoss(nn.Module):
         labels = torch.unsqueeze(labels, dim=1)
         labels = torch.tile(labels, dims=(1,2))
         labels = labels.view(-1, 1)
-        label = torch.squeeze(labels)
+        # label = torch.squeeze(labels)
 
         label_tile = torch.tile(labels.view(1, -1), dims=(labels.shape[0], 1))
         positive_label_mask = torch.eq(label_tile, label_tile.T)
@@ -49,7 +49,7 @@ class SupConLoss(nn.Module):
         logits = torch.div(logits, positive_count)
         logits = logits * (-1)
 
-        loss = logits.mean()
+        loss = logits #.mean()
 
         # loss = loss / features.shape[0]
 
