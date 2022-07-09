@@ -44,7 +44,6 @@ def make_imagnet_V2():
         json.dump(mapper_, fp)
 
 
-
 def get_mean_and_std(dataloader):
     channels_sum, channels_squared_sum, num_batches = 0, 0, 0
     for data, _ in dataloader:
@@ -61,10 +60,33 @@ def get_mean_and_std(dataloader):
     return mean, std
 
 
-if __name__ == "__main__":
-    # dataset = MiniImageNet(root_dir="../Inputs/mini_image_net_merged/",
-    #                         label_file="../Inputs/Labels/wordnet_details.txt", criterion="CE")
-    # dataLoa = DataLoader(dataset, batch_size=64)
+def make_imagnet_v2_subset():
+    dir_to_imagnet_v2 = "../Outputs/Target/imagenet_v2/"
+    path_to_labels_to_include = "../Inputs/Labels/subset_mini_imagenet.txt"
+    dir_to_subset = "../Outputs/Target/imagenet_v2_subset/"
+    image_list_of_imagenet_v2 = os.listdir(dir_to_imagnet_v2)
 
-    # print(get_mean_and_std(dataLoa))
-    make_imagnet_V2()
+    labels_to_include = []
+    with open(path_to_labels_to_include, 'r') as fp:
+        for i in fp.readlines():
+            wn_id = i.split(' ')[0]
+            labels_to_include.append(wn_id)
+
+    labels_to_include.pop(0)
+    labels_to_include = set(labels_to_include)
+
+    for i in image_list_of_imagenet_v2:
+        wn_id = i.split('_')[0]
+        if wn_id in labels_to_include:
+            src = dir_to_imagnet_v2 + i
+            dst = dir_to_subset + i
+            shutil.copy(src, dst)
+
+if __name__ == "__main__":
+    dataset = MiniImageNet(root_dir="../Inputs/mini_image_net_merged/",
+                            label_file="../Inputs/Labels/wordnet_details.txt", criterion="CE")
+    dataLoa = DataLoader(dataset, batch_size=64)
+
+    print(get_mean_and_std(dataLoa))
+    # make_imagnet_V2()
+    make_imagnet_v2_subset()
