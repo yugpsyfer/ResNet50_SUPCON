@@ -20,7 +20,7 @@ from .model import ResNet
 
 
 source_dataset_path = "./Inputs/mini_imagenet_subset/"  #CHANGED
-target_dataset_path = "./Output/Target/imagenet_v2/"
+target_dataset_path = "./Output/Target/imagenet_v2_subset/"
 output_model_path = "Outputs/Models/"
 
 
