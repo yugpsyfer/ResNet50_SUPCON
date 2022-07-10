@@ -32,5 +32,5 @@ class ImageNetV2(Dataset):
             z = im.resize((32, 32))
             z = np.array(z)
             data = self.tensorTransformation(z)
-
-        return data, label
+        data = data.to(torch.double)
+        return (data, label)

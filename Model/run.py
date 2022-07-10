@@ -144,7 +144,7 @@ def inference(opt):
     dev = get_cuda_device()
     mm = ResNet(opt.mode, criterion_loss=None, model_name=opt.model_name)
     model = mm.model
-    test_dl = prepare_dataloader(ImageNetV2, opt.batch_size, opt.loss_criterion, target_dataset_path)
+    test_dl, _ = prepare_dataloader(ImageNetV2, opt.batch_size, opt.loss_criterion, target_dataset_path)
     model.double()
     model.to(dev)
 
@@ -157,7 +157,7 @@ def inference(opt):
     _, rest = divmod(seconds_elapsed, 3600)
     minutes, rest = divmod(rest, 60)
 
-    print("ACCURACY = {accu:2.6f}".format(acc=accuracy))
+    print("ACCURACY = {acc:2.6f}".format(acc=accuracy))
     print("LOSS = {los:2.6f}".format(los=loss))
     print("TIME REQUIRED TO TEST THE MODEL:" + str(minutes) + " mins")
 

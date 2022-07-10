@@ -149,7 +149,6 @@ def test(val_dl, model, dev):
     count = 0
 
     for batch in val_dl:
-
         images, labels = batch
 
         images = images.to(dev)
@@ -157,7 +156,7 @@ def test(val_dl, model, dev):
         labels = labels.to(dev)
 
         out = model(images)
-        loss = calculate_loss("CE", labels, out, embeddings_=None)
+        loss = calculate_loss(criterion=["CE", F.cross_entropy, 2], labels_true=labels,out=out, embeddings_=None)
 
         pred = torch.argmax(out, dim=1).cpu()
         pred = pred.numpy().flatten()
