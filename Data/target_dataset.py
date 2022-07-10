@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class ImageNetV2(Dataset):
-    def __init__(self, root_dir, label_file):
+    def __init__(self, root_dir, label_file, criterion=None):
         self.rootDir = root_dir
         self.allFiles = os.listdir(self.rootDir)
         self.label_dict = dict()
