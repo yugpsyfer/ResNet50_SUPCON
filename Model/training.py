@@ -149,6 +149,7 @@ def test(val_dl, model, dev):
     count = 0
 
     for batch in val_dl:
+
         images, labels = batch
 
         images = images.to(dev)
