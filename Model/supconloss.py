@@ -46,7 +46,7 @@
 #         return loss
 
 import torch
-import torch.nn as nn
+import torch.nn as nn8
 
 
 class SupConLoss(nn.Module):
