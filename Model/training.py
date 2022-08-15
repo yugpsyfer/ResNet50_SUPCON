@@ -139,9 +139,6 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config, anneali
     return model
 
 
-"""NOT WORKING HAS TO BE REIMPLEMENTED"""
-
-
 @torch.no_grad()
 def test(val_dl, model, dev):
     net_loss = 0

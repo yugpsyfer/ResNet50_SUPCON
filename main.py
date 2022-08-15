@@ -4,6 +4,9 @@ import wandb
 
 
 if __name__ == '__main__':
+    # WANDB PARAMS
+    project = "KG-NN Transfer learning Redo"
+    entity = "thesis-yugansh"
 
     parser = argparse.ArgumentParser(description='Process options for KG-NN')
     parser.add_argument('--loss_criterion', type=str, default="SupCon",
@@ -26,6 +29,8 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     criterion_options = dict()
+
+    # CONFIGURATIONS USED DURING TRAINING
 
     criterion_options['SupCon'] = {"criterion": 'SupCon',
                                    "epochs": opt.epochs,
@@ -54,7 +59,7 @@ if __name__ == '__main__':
     config['model'] = "ResNet-50"
     config['dataset'] = opt.dataset_name
 
-    wandb.init(project="KG-NN Transfer learning Redo", config=config, entity="thesis-yugansh")
+    wandb.init(project=project, config=config, entity=entity)
 
     if opt.mode == 0:
         run.pre_training(opt, config)

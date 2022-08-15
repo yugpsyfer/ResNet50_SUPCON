@@ -1,3 +1,7 @@
+"""
+NOT USEFUL IF WORKING WITH FULL DATASET
+
+"""
 import os
 import shutil
 

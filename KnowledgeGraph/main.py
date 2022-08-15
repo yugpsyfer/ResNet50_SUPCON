@@ -1,5 +1,5 @@
 """
-ENTIRE CODE IS USELESS WILL CHANGE IN FUTURE
+ENTIRE CODE IS USELESS
 """
 
 from rdflib import Graph, term, Literal

@@ -1,8 +1,5 @@
-"""TO DO
-1] Reimplement inference function"""
-
 """
-------------------------IMPLEMENTED BY YUGANSH SINGH----------------------------------
+EACH FUNCTIONS NAME IS ACCORDING TO ITS FUNCTIONALITY
 """
 
 import os.path
@@ -138,7 +135,6 @@ def linear_phase_training(opt, config):
     model_save_path = os.path.join(output_model_path, "trained_" + model_name + ".pt")
     save_model(model_save_path, trained_model)
 
-"""BELOW CODE IS NOT WORKING WILL HAVE TO RECODE THIS"""
 
 def inference(opt):
     dev = get_cuda_device()

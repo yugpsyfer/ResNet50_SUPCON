@@ -1,54 +1,3 @@
-# """
-# Author: Yugansh Singh
-# Date: 2022, May 23
-# """
-#
-# import torch
-# import torch.nn as nn
-#
-#
-# class SupConLoss(nn.Module):
-#
-#     def __init__(self, device, temperature=0.07):
-#         super().__init__()
-#         self.temperature = temperature
-#         self.device = device
-#
-#     def forward(self, features, embeddings, labels):
-#
-#         labels = torch.unsqueeze(labels, dim=1)
-#         labels = torch.tile(labels, dims=(1, 2))
-#         labels = labels.view(-1, 1)
-#
-#         label_tile = torch.tile(labels.view(1, -1), dims=(labels.shape[0], 1))
-#         positive_label_mask = torch.eq(label_tile, label_tile.T)
-#
-#         negative_label_mask = (~positive_label_mask).to(device=self.device, dtype=torch.int32)
-#         positive_label_mask = positive_label_mask.to(device=self.device, dtype=torch.int32) - torch.eye(n=labels.shape[0],
-#                                                                                                         m=labels.shape[0],
-#                                                                                                         device=self.device)
-#         positive_count = torch.sum(positive_label_mask, dim=0)
-#
-#         all_dot = torch.matmul(embeddings, features.permute(1, 0)) / self.temperature
-#
-#         negatives = torch.exp(all_dot) * negative_label_mask
-#         negatives = torch.log(torch.sum(negatives, dim=1))
-#         _log_ = all_dot - negatives
-#
-#         logits = torch.sum(_log_ * positive_label_mask, dim=1)
-#         logits = torch.div(logits, positive_count)
-#         logits = logits * (-1)
-#
-#         loss = torch.mean(logits) #.mean()
-#
-#         # loss = loss / features.shape[0]
-#
-#         return loss
-
-import torch
-import torch.nn as nn8
-
-
 class SupConLoss(nn.Module):
     """Supervised Contrastive Learning: https://arxiv.org/pdf/2004.11362.pdf.
     It also supports the unsupervised contrastive loss in SimCLR"""
@@ -94,7 +43,7 @@ class SupConLoss(nn.Module):
         else:
             mask = mask.float().to(device)
 
-        contrast_count = 2
+        contrast_count = 2  # HARDCODED TOTAL NUMBER OF TRANSFORMATIONS
         contrast_feature = features #torch.cat(torch.unbind(features, dim=1), dim=0)
         if self.contrast_mode == 'one':
             anchor_feature = features[:, 0]
