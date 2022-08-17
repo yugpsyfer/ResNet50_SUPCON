@@ -1,7 +1,3 @@
-"""TO DO
-ADD get item for tensor loss in SUPCON METRIC
-
-"""
 import torch
 from sklearn.metrics import accuracy_score
 import torch.nn.functional as F
@@ -126,8 +122,7 @@ def train(train_dl, val_dl, optimizer, model, device, criterion, config, anneali
 
         l_val, metric_val = validate(val_dl, model, device, criterion)
         l_train, metric_train = validate(train_dl, model, device, criterion)
-        # print("TRAIN LOSS = ", l_train)
-        # print("TRAIN Cosine sim = ", metric_train)
+
         wandb.log({"Validation Loss": l_val,
                    "Validation " + config["metric"]: metric_val,
                    "Training Loss": l_train,
