@@ -1,4 +1,4 @@
-# Redo of Learning Visual Models using a Knowledge Graph as a Trainer || [Paper](https://arxiv.org/abs/2102.08747)
+# Repro of Learning Visual Models using a Knowledge Graph as a Trainer || [Paper](https://arxiv.org/abs/2102.08747)
 
 ---
 ## Quickstart
